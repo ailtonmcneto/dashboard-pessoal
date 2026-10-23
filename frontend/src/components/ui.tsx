@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react'
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <section className={`rounded-xl border border-line bg-surface p-5 ${className}`}>{children}</section>
@@ -62,4 +68,46 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
 export function ErrorText({ error }: { error: unknown }) {
   if (!error) return null
   return <p className="text-sm text-danger">{error instanceof Error ? error.message : 'Algo deu errado'}</p>
+}
+
+export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea className={fieldClass} rows={3} {...props} />
+}
+
+export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="mb-3 flex items-center justify-between gap-2">
+      <h2 className="font-semibold">{children}</h2>
+      {action}
+    </div>
+  )
+}
+
+export function Empty({ children }: { children: ReactNode }) {
+  return <p className="text-sm text-muted">{children}</p>
+}
+
+export function IconButton({ label, className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      className={`rounded-md p-1 text-muted transition hover:bg-canvas hover:text-ink ${className}`}
+      {...props}
+    />
+  )
+}
+
+/** Mostra "carregando" / erro / conteúdo de uma query do TanStack. */
+export function Loaded<T>({
+  query,
+  children,
+}: {
+  query: { isPending: boolean; isError: boolean; error: unknown; data: T | undefined }
+  children: (data: T) => ReactNode
+}) {
+  if (query.isPending) return <p className="text-sm text-muted">Carregando…</p>
+  if (query.isError) return <ErrorText error={query.error} />
+  return <>{children(query.data as T)}</>
 }

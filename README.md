@@ -50,7 +50,7 @@ Para subir a API também em container: `docker compose --profile api up -d --bui
 backend/                     API Spring Boot
   src/main/java/com/vida/    um pacote por módulo (auth, academico, financas, saude, metas, hoje…)
   src/main/resources/
-    db/migration/            migrações Flyway (V1__..., V2__...)
+    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico…)
 frontend/                    SPA React + Vite + TS
 docker-compose.yml           Postgres 18 (+ API no profile "api")
 ```
@@ -69,11 +69,18 @@ Erros da API seguem o formato `application/problem+json`; erros de validação t
 - Saldos, médias e progresso são calculados, nunca armazenados.
 - Nos records de request/response, campo sem `@Nullable` é obrigatório no OpenAPI; com `@Nullable`, opcional e pode ser `null`. É isso que define os tipos gerados no front.
 
+## Estudos: regras de cálculo
+
+- **Média:** ponderada, com cada nota normalizada para 0–10 (`nota / nota máxima × 10`). A disciplina mostra quanto falta tirar, em média, nas avaliações ainda sem nota para chegar na média de aprovação do semestre, e a situação: *sem notas*, *em dia*, *em risco* (precisa de mais que a média), *aprovado* ou *reprovado* por nota.
+- **Faltas:** alerta a partir de 75% do limite cadastrado na disciplina.
+- **Revisão espaçada:** ao revisar um assunto você informa o domínio de 0 a 5, que define a próxima revisão: 1, 2, 4, 7, 15 ou 30 dias.
+- **Sessões de estudo:** apagar uma disciplina ou curso mantém as horas estudadas, que passam a contar como "Sem vínculo".
+
 ## Roadmap
 
 0. ~~Esqueleto do projeto~~
 1. ~~Núcleo e autenticação (sessão + CSRF), agenda~~
-2. Acadêmico — semestres, disciplinas, horário, avaliações, faltas, assuntos, cursos, sessões de estudo
+2. ~~Acadêmico — semestres, disciplinas, horário, avaliações, faltas, assuntos, cursos, sessões de estudo~~
 3. Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento
 4. Saúde e hábitos — métricas, medições, hábitos com sequência
 5. Metas e planos — metas, marcos, projetos, tarefas

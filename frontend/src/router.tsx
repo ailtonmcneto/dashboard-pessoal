@@ -1,5 +1,12 @@
 import { createBrowserRouter } from 'react-router'
 import { AppLayout } from './components/AppLayout'
+import { DisciplinaPage } from './estudos/DisciplinaPage'
+import { EstudosLayout } from './estudos/EstudosLayout'
+import { HorarioPage } from './estudos/HorarioPage'
+import { RecursosPage } from './estudos/RecursosPage'
+import { RevisoesPage } from './estudos/RevisoesPage'
+import { SemestrePage } from './estudos/SemestrePage'
+import { SessoesPage } from './estudos/SessoesPage'
 import { AgendaPage } from './pages/AgendaPage'
 import { ComingSoonPage } from './pages/ComingSoonPage'
 import { HojePage } from './pages/HojePage'
@@ -14,13 +21,15 @@ export const router = createBrowserRouter([
       { path: 'agenda', element: <AgendaPage /> },
       {
         path: 'estudos',
-        element: (
-          <ComingSoonPage
-            title="Estudos"
-            phase={2}
-            items={['Semestres e disciplinas', 'Horário semanal e faltas', 'Provas, trabalhos e médias', 'Assuntos, cursos e sessões de estudo']}
-          />
-        ),
+        element: <EstudosLayout />,
+        children: [
+          { index: true, element: <SemestrePage /> },
+          { path: 'horario', element: <HorarioPage /> },
+          { path: 'revisoes', element: <RevisoesPage /> },
+          { path: 'cursos', element: <RecursosPage /> },
+          { path: 'sessoes', element: <SessoesPage /> },
+          { path: 'disciplinas/:id', element: <DisciplinaPage /> },
+        ],
       },
       {
         path: 'financas',

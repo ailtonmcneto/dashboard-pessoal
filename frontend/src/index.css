@@ -10,6 +10,13 @@
   --color-accent: #0f766e;
   --color-accent-soft: #ccfbf1;
   --color-danger: #b91c1c;
+
+  /* dados (validado com o dataviz: banda de luminosidade, croma e contraste ≥ 3:1) */
+  --color-chart: #0d9488;
+  /* status: sempre com ícone + rótulo, nunca só a cor */
+  --color-good: #0ca30c;
+  --color-warning: #fab219;
+  --color-critical: #d03b3b;
 }
 
 body {

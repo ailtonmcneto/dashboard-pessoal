@@ -14,3 +14,33 @@ export function dayKey(iso: string): string {
 export const localInputToIso = (value: string) => new Date(value).toISOString()
 
 export const browserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone
+
+/** 'AAAA-MM-DD' (LocalDate da API) como data local, sem deslocar o dia pelo fuso. */
+export function parseLocalDate(value: string): Date {
+  const [y, m, d] = value.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+const shortDateFmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' })
+const weekdayDateFmt = new Intl.DateTimeFormat('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' })
+
+export const formatDate = (value: string) => shortDateFmt.format(parseLocalDate(value))
+export const formatWeekdayDate = (value: string) => weekdayDateFmt.format(parseLocalDate(value))
+
+/** Hoje como 'AAAA-MM-DD' no fuso do navegador. */
+export const todayIso = () => dayKey(new Date().toISOString())
+
+/** 'HH:mm:ss' → 'HH:mm'. */
+export const formatClock = (value: string) => value.slice(0, 5)
+
+export const WEEKDAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+
+export function formatMinutes(total: number): string {
+  const h = Math.floor(total / 60)
+  const m = total % 60
+  if (h === 0) return `${m} min`
+  return m === 0 ? `${h} h` : `${h} h ${m} min`
+}
+
+const grade = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+export const formatGrade = (n: number) => grade.format(n)

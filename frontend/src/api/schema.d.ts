@@ -4,7 +4,23 @@
  */
 
 export interface paths {
-    "/events/{id}": {
+    "/topics/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateTopic"];
+        post?: never;
+        delete: operations["deleteTopic"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/terms/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -20,7 +36,103 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events": {
+    "/resources/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateResource"];
+        post?: never;
+        delete: operations["deleteResource"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update_1"];
+        post?: never;
+        delete: operations["delete_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/courses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get"];
+        put: operations["update_2"];
+        post?: never;
+        delete: operations["delete_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assessments/{assessmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateAssessment"];
+        post?: never;
+        delete: operations["deleteAssessment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["topics"];
+        put?: never;
+        post: operations["createTopic"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/topics/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/terms": {
         parameters: {
             query?: never;
             header?: never;
@@ -30,6 +142,118 @@ export interface paths {
         get: operations["list"];
         put?: never;
         post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/study-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sessions"];
+        put?: never;
+        post: operations["createSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["resources"];
+        put?: never;
+        post: operations["createResource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_1"];
+        put?: never;
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/courses/{id}/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["slots"];
+        put?: never;
+        post: operations["addSlot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/courses/{id}/assessments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["assessments"];
+        put?: never;
+        post: operations["addAssessment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/courses/{id}/absences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["absences"];
+        put?: never;
+        post: operations["addAbsence"];
         delete?: never;
         options?: never;
         head?: never;
@@ -62,6 +286,54 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/terms/{id}/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/study-sessions/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["schedule"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -116,10 +388,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/upcoming": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["upcoming"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/study-sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/slots/{slotId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteSlot"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/absences/{absenceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteAbsence"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        TopicRequest: {
+            title: string;
+            /** Format: uuid */
+            courseId?: string | null;
+            /** Format: uuid */
+            resourceId?: string | null;
+            /** Format: uuid */
+            parentId?: string | null;
+        };
+        TopicResponse: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: uuid */
+            courseId?: string | null;
+            /** Format: uuid */
+            resourceId?: string | null;
+            /** Format: uuid */
+            parentId?: string | null;
+            /** Format: int32 */
+            mastery: number;
+            /** Format: date */
+            lastReviewedOn?: string | null;
+            /** Format: date */
+            nextReviewOn?: string | null;
+            due: boolean;
+        };
+        TermRequest: {
+            name: string;
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn: string;
+            passingGrade?: number | null;
+        };
+        TermResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn: string;
+            passingGrade: number;
+            current: boolean;
+        };
+        ResourceRequest: {
+            title: string;
+            /** @enum {string|null} */
+            kind?: "CURSO" | "LIVRO" | "VIDEO" | "ARTIGO" | "OUTRO" | null;
+            provider?: string | null;
+            url?: string | null;
+            /** Format: int32 */
+            totalUnits?: number | null;
+            /** Format: int32 */
+            doneUnits?: number | null;
+            /** @enum {string|null} */
+            status?: "PLANEJADO" | "ATIVO" | "PAUSADO" | "CONCLUIDO" | null;
+            /** Format: date */
+            startedOn?: string | null;
+            /** Format: date */
+            finishedOn?: string | null;
+        };
+        ResourceResponse: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** @enum {string} */
+            kind: "CURSO" | "LIVRO" | "VIDEO" | "ARTIGO" | "OUTRO";
+            provider?: string | null;
+            url?: string | null;
+            /** Format: int32 */
+            totalUnits?: number | null;
+            /** Format: int32 */
+            doneUnits: number;
+            /** Format: int32 */
+            progressPercent?: number | null;
+            /** @enum {string} */
+            status: "PLANEJADO" | "ATIVO" | "PAUSADO" | "CONCLUIDO";
+            /** Format: date */
+            startedOn?: string | null;
+            /** Format: date */
+            finishedOn?: string | null;
+        };
         EventRequest: {
             title: string;
             /** @enum {string|null} */
@@ -144,6 +564,159 @@ export interface components {
             location?: string | null;
             notes?: string | null;
         };
+        CourseRequest: {
+            /** Format: uuid */
+            termId: string;
+            name: string;
+            code?: string | null;
+            professor?: string | null;
+            /** Format: int32 */
+            workloadHours?: number | null;
+            /** Format: int32 */
+            maxAbsences?: number | null;
+            color?: string | null;
+            /** @enum {string|null} */
+            status?: "CURSANDO" | "APROVADO" | "REPROVADO" | "TRANCADO" | null;
+        };
+        AbsenceSummary: {
+            /** Format: int32 */
+            used: number;
+            /** Format: int32 */
+            max?: number | null;
+            /** @enum {string} */
+            status: "SEM_LIMITE" | "OK" | "ATENCAO" | "ESTOURADO";
+        };
+        CourseResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            termId: string;
+            name: string;
+            code?: string | null;
+            professor?: string | null;
+            /** Format: int32 */
+            workloadHours?: number | null;
+            /** Format: int32 */
+            maxAbsences?: number | null;
+            color: string;
+            /** @enum {string} */
+            status: "CURSANDO" | "APROVADO" | "REPROVADO" | "TRANCADO";
+            grades: components["schemas"]["GradeSummary"];
+            absences: components["schemas"]["AbsenceSummary"];
+        };
+        GradeSummary: {
+            average?: number | null;
+            passingGrade: number;
+            gradedWeight: number;
+            pendingWeight: number;
+            neededOnPending?: number | null;
+            /** @enum {string} */
+            status: "SEM_NOTAS" | "EM_DIA" | "EM_RISCO" | "APROVADO" | "REPROVADO";
+        };
+        AssessmentRequest: {
+            title: string;
+            /** @enum {string|null} */
+            kind?: "PROVA" | "TRABALHO" | "SEMINARIO" | "LISTA" | "PROJETO" | "OUTRO" | null;
+            /** Format: date */
+            dueOn?: string | null;
+            weight?: number | null;
+            maxScore?: number | null;
+            score?: number | null;
+            topicIds?: string[] | null;
+        };
+        AssessmentResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseId: string;
+            courseName: string;
+            color: string;
+            title: string;
+            /** @enum {string} */
+            kind: "PROVA" | "TRABALHO" | "SEMINARIO" | "LISTA" | "PROJETO" | "OUTRO";
+            /** Format: date */
+            dueOn?: string | null;
+            weight: number;
+            maxScore: number;
+            score?: number | null;
+            normalizedScore?: number | null;
+            topicIds: string[];
+        };
+        ReviewRequest: {
+            /** Format: int32 */
+            mastery: number;
+        };
+        StudySessionRequest: {
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: int32 */
+            minutes: number;
+            /** Format: uuid */
+            courseId?: string | null;
+            /** Format: uuid */
+            resourceId?: string | null;
+            /** Format: uuid */
+            topicId?: string | null;
+            notes?: string | null;
+        };
+        StudySessionResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: int32 */
+            minutes: number;
+            /** Format: uuid */
+            courseId?: string | null;
+            /** Format: uuid */
+            resourceId?: string | null;
+            /** Format: uuid */
+            topicId?: string | null;
+            notes?: string | null;
+            label: string;
+        };
+        SlotRequest: {
+            /** Format: int32 */
+            weekday: number;
+            /** Format: time-local */
+            startTime: string;
+            /** Format: time-local */
+            endTime: string;
+            room?: string | null;
+        };
+        SlotResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseId: string;
+            courseName: string;
+            color: string;
+            /** Format: int32 */
+            weekday: number;
+            /** Format: time-local */
+            startTime: string;
+            /** Format: time-local */
+            endTime: string;
+            room?: string | null;
+        };
+        AbsenceRequest: {
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            classesMissed?: number | null;
+            note?: string | null;
+        };
+        AbsenceResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseId: string;
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            classesMissed: number;
+            note?: string | null;
+        };
         RegisterRequest: {
             name: string;
             /** Format: email */
@@ -162,6 +735,28 @@ export interface components {
             email: string;
             password: string;
         };
+        StudyBucket: {
+            /** Format: uuid */
+            courseId?: string | null;
+            /** Format: uuid */
+            resourceId?: string | null;
+            label: string;
+            color?: string | null;
+            /** Format: int32 */
+            minutes: number;
+        };
+        StudyDay: {
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            minutes: number;
+        };
+        StudySummary: {
+            /** Format: int32 */
+            totalMinutes: number;
+            bySubject: components["schemas"]["StudyBucket"][];
+            byDay: components["schemas"]["StudyDay"][];
+        };
         StatusResponse: {
             signupOpen: boolean;
         };
@@ -174,6 +769,52 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    updateTopic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TopicRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TopicResponse"];
+                };
+            };
+        };
+    };
+    deleteTopic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     update: {
         parameters: {
             query?: never;
@@ -185,7 +826,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EventRequest"];
+                "application/json": components["schemas"]["TermRequest"];
             };
         };
         responses: {
@@ -195,7 +836,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["EventResponse"];
+                    "*/*": components["schemas"]["TermResponse"];
                 };
             };
         };
@@ -220,7 +861,422 @@ export interface operations {
             };
         };
     };
+    updateResource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResourceResponse"];
+                };
+            };
+        };
+    };
+    deleteResource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["EventResponse"];
+                };
+            };
+        };
+    };
+    delete_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CourseResponse"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CourseResponse"];
+                };
+            };
+        };
+    };
+    delete_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssessmentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssessmentResponse"];
+                };
+            };
+        };
+    };
+    deleteAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assessmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    topics: {
+        parameters: {
+            query?: {
+                courseId?: string;
+                resourceId?: string;
+                due?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TopicResponse"][];
+                };
+            };
+        };
+    };
+    createTopic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TopicRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TopicResponse"];
+                };
+            };
+        };
+    };
+    review: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TopicResponse"];
+                };
+            };
+        };
+    };
     list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TermResponse"][];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TermRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TermResponse"];
+                };
+            };
+        };
+    };
+    sessions: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StudySessionResponse"][];
+                };
+            };
+        };
+    };
+    createSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudySessionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StudySessionResponse"];
+                };
+            };
+        };
+    };
+    resources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResourceResponse"][];
+                };
+            };
+        };
+    };
+    createResource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ResourceResponse"];
+                };
+            };
+        };
+    };
+    list_1: {
         parameters: {
             query?: {
                 from?: string;
@@ -243,7 +1299,7 @@ export interface operations {
             };
         };
     };
-    create: {
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -263,6 +1319,174 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["EventResponse"];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CourseResponse"];
+                };
+            };
+        };
+    };
+    slots: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SlotResponse"][];
+                };
+            };
+        };
+    };
+    addSlot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlotRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SlotResponse"];
+                };
+            };
+        };
+    };
+    assessments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssessmentResponse"][];
+                };
+            };
+        };
+    };
+    addAssessment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssessmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssessmentResponse"];
+                };
+            };
+        };
+    };
+    absences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AbsenceResponse"][];
+                };
+            };
+        };
+    };
+    addAbsence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AbsenceRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AbsenceResponse"];
                 };
             };
         };
@@ -315,6 +1539,73 @@ export interface operations {
             };
         };
     };
+    courses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CourseResponse"][];
+                };
+            };
+        };
+    };
+    summary: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StudySummary"];
+                };
+            };
+        };
+    };
+    schedule: {
+        parameters: {
+            query?: {
+                termId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SlotResponse"][];
+                };
+            };
+        };
+    };
     status: {
         parameters: {
             query?: never;
@@ -360,6 +1651,88 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    upcoming: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssessmentResponse"][];
+                };
+            };
+        };
+    };
+    deleteSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteSlot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteAbsence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                absenceId: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
