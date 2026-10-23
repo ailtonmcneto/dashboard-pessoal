@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { EventList } from '../agenda/EventList'
@@ -7,7 +8,8 @@ import { Card, Empty, ErrorText, Loaded, PageHeader, SectionTitle } from '../com
 import { useSchedule, useTopics, useUpcomingAssessments } from '../estudos/api'
 import { ASSESSMENT_KIND } from '../estudos/labels'
 import { ColorDot } from '../estudos/parts'
-import { formatClock, formatDate, todayIso } from '../lib/format'
+import { useMonthSummary } from '../financas/api'
+import { currentMonth, formatClock, formatDate, formatMoney, todayIso } from '../lib/format'
 
 const todayFmt = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
@@ -87,6 +89,37 @@ function UpcomingAssessments() {
   )
 }
 
+function MoneyToday() {
+  const summary = useMonthSummary(currentMonth())
+  return (
+    <Card>
+      <SectionTitle action={<MoreLink to="/financas">Finanças</MoreLink>}>Dinheiro</SectionTitle>
+      <Loaded query={summary}>
+        {(s) => (
+          <dl className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <dt className="text-muted">Saldo em contas</dt>
+              <dd className="text-xl font-bold tabular-nums">{formatMoney(s.totalBalance)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Gasto no mês</dt>
+              <dd className="text-xl font-bold tabular-nums">{formatMoney(s.expense)}</dd>
+            </div>
+            {s.pendingCount > 0 && (
+              <div className="col-span-2 flex items-center gap-2">
+                <AlertTriangle size={14} className="text-warning" aria-hidden="true" />
+                <Link to="/financas/lancamentos" className="hover:underline">
+                  {s.pendingCount} {s.pendingCount === 1 ? 'conta a pagar' : 'contas a pagar'} ({formatMoney(s.pendingAmount)})
+                </Link>
+              </div>
+            )}
+          </dl>
+        )}
+      </Loaded>
+    </Card>
+  )
+}
+
 function ReviewsToday() {
   const due = useTopics({ due: true })
   return (
@@ -132,6 +165,7 @@ export function HojePage() {
           )}
         </Card>
         <ReviewsToday />
+        <MoneyToday />
       </div>
     </>
   )

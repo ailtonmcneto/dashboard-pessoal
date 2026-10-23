@@ -1,9 +1,12 @@
-import type {
-  ButtonHTMLAttributes,
-  InputHTMLAttributes,
-  ReactNode,
-  SelectHTMLAttributes,
-  TextareaHTMLAttributes,
+import {
+  type ButtonHTMLAttributes,
+  cloneElement,
+  type InputHTMLAttributes,
+  type ReactElement,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+  useId,
 } from 'react'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -39,6 +42,10 @@ export function Button({
 const fieldClass =
   'w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft'
 
+/**
+ * Rótulo + campo + erro. O rótulo aponta para o campo por id (e não o envolve), para o nome
+ * acessível ser só o texto do rótulo — num <select> envolvido, o valor escolhido entraria no nome.
+ */
 export function Field({
   label,
   error,
@@ -46,14 +53,26 @@ export function Field({
 }: {
   label: string
   error?: string
-  children: ReactNode
+  children: ReactElement<{ id?: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean }>
 }) {
+  const id = useId()
+  const errorId = `${id}-error`
   return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium">{label}</span>
-      {children}
-      {error && <span className="block text-xs text-danger">{error}</span>}
-    </label>
+    <div className="space-y-1">
+      <label htmlFor={id} className="block text-sm font-medium">
+        {label}
+      </label>
+      {cloneElement(children, {
+        id,
+        'aria-describedby': error ? errorId : undefined,
+        'aria-invalid': error ? true : undefined,
+      })}
+      {error && (
+        <span id={errorId} className="block text-xs text-danger">
+          {error}
+        </span>
+      )}
+    </div>
   )
 }
 

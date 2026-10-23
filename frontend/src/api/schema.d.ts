@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/transactions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateTransaction"];
+        post?: never;
+        delete: operations["deleteTransaction"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/topics/{id}": {
         parameters: {
             query?: never;
@@ -52,6 +68,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/recurrences/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateRecurrence"];
+        post?: never;
+        delete: operations["deleteRecurrence"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{id}": {
         parameters: {
             query?: never;
@@ -84,6 +116,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateCategory"];
+        post?: never;
+        delete: operations["deleteCategory"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cards/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateCard"];
+        post?: never;
+        delete: operations["deleteCard"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/budgets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["budgets"];
+        put: operations["upsertBudget"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{assessmentId}": {
         parameters: {
             query?: never;
@@ -95,6 +175,38 @@ export interface paths {
         put: operations["updateAssessment"];
         post?: never;
         delete: operations["deleteAssessment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateAccount"];
+        post?: never;
+        delete: operations["deleteAccount"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["transactions"];
+        put?: never;
+        post: operations["createTransaction"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -174,6 +286,54 @@ export interface paths {
         get: operations["resources"];
         put?: never;
         post: operations["createResource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recurrences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["recurrences"];
+        put?: never;
+        post: operations["createRecurrence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recurrences/{id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resumeRecurrence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recurrences/{id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["pauseRecurrence"];
         delete?: never;
         options?: never;
         head?: never;
@@ -260,6 +420,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["categories"];
+        put?: never;
+        post: operations["createCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createDefaultCategories"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["cards"];
+        put?: never;
+        post: operations["createCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cards/{id}/invoices/{month}/pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["payInvoice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/budgets/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["copyBudgets"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/register": {
         parameters: {
             query?: never;
@@ -286,6 +526,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["accounts"];
+        put?: never;
+        post: operations["createAccount"];
         delete?: never;
         options?: never;
         head?: never;
@@ -332,6 +588,54 @@ export interface paths {
             cookie?: never;
         };
         get: operations["schedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["summary_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cards/{id}/invoices/{month}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["invoice"];
         put?: never;
         post?: never;
         delete?: never;
@@ -436,6 +740,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/budgets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteBudget"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/absences/{absenceId}": {
         parameters: {
             query?: never;
@@ -456,6 +776,55 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        TransactionRequest: {
+            /** @enum {string} */
+            kind: "RECEITA" | "DESPESA" | "TRANSFERENCIA" | "PAGAMENTO_FATURA";
+            /** Format: date */
+            date: string;
+            description: string;
+            amount: number;
+            /** Format: uuid */
+            categoryId?: string | null;
+            /** Format: uuid */
+            accountId?: string | null;
+            /** Format: uuid */
+            cardId?: string | null;
+            /** Format: uuid */
+            toAccountId?: string | null;
+            /** Format: int32 */
+            installments?: number | null;
+            paid?: boolean | null;
+            notes?: string | null;
+        };
+        TransactionResponse: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "RECEITA" | "DESPESA" | "TRANSFERENCIA" | "PAGAMENTO_FATURA";
+            /** Format: date */
+            date: string;
+            description: string;
+            amount: number;
+            /** Format: uuid */
+            categoryId?: string | null;
+            /** Format: uuid */
+            accountId?: string | null;
+            /** Format: uuid */
+            cardId?: string | null;
+            /** Format: uuid */
+            toAccountId?: string | null;
+            invoiceMonth?: string | null;
+            paid: boolean;
+            /** Format: uuid */
+            installmentGroupId?: string | null;
+            /** Format: int32 */
+            installmentNo?: number | null;
+            /** Format: int32 */
+            installmentTotal?: number | null;
+            /** Format: uuid */
+            recurrenceId?: string | null;
+            notes?: string | null;
+        };
         TopicRequest: {
             title: string;
             /** Format: uuid */
@@ -540,6 +909,49 @@ export interface components {
             /** Format: date */
             finishedOn?: string | null;
         };
+        RecurrenceRequest: {
+            description: string;
+            amount: number;
+            /** @enum {string} */
+            kind: "RECEITA" | "DESPESA" | "TRANSFERENCIA" | "PAGAMENTO_FATURA";
+            /** Format: uuid */
+            categoryId?: string | null;
+            /** Format: uuid */
+            accountId?: string | null;
+            /** Format: uuid */
+            cardId?: string | null;
+            /** @enum {string|null} */
+            frequency?: "SEMANAL" | "MENSAL" | "ANUAL" | null;
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn?: string | null;
+        };
+        RecurrenceResponse: {
+            /** Format: uuid */
+            id: string;
+            description: string;
+            amount: number;
+            /** @enum {string} */
+            kind: "RECEITA" | "DESPESA" | "TRANSFERENCIA" | "PAGAMENTO_FATURA";
+            /** Format: uuid */
+            categoryId?: string | null;
+            /** Format: uuid */
+            accountId?: string | null;
+            /** Format: uuid */
+            cardId?: string | null;
+            /** @enum {string} */
+            frequency: "SEMANAL" | "MENSAL" | "ANUAL";
+            /** Format: date */
+            startsOn: string;
+            /** Format: date */
+            endsOn?: string | null;
+            /** Format: date */
+            nextOn: string;
+            active: boolean;
+            /** Format: int32 */
+            generated: number;
+        };
         EventRequest: {
             title: string;
             /** @enum {string|null} */
@@ -613,6 +1025,84 @@ export interface components {
             /** @enum {string} */
             status: "SEM_NOTAS" | "EM_DIA" | "EM_RISCO" | "APROVADO" | "REPROVADO";
         };
+        CategoryRequest: {
+            name: string;
+            /** @enum {string} */
+            kind: "RECEITA" | "DESPESA";
+            /** Format: uuid */
+            parentId?: string | null;
+            color?: string | null;
+            archived?: boolean | null;
+        };
+        CategoryResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            kind: "RECEITA" | "DESPESA";
+            /** Format: uuid */
+            parentId?: string | null;
+            color: string;
+            archived: boolean;
+        };
+        CardRequest: {
+            name: string;
+            creditLimit?: number | null;
+            /** Format: int32 */
+            closingDay: number;
+            /** Format: int32 */
+            dueDay: number;
+            /** Format: uuid */
+            paymentAccountId?: string | null;
+            archived?: boolean | null;
+        };
+        CardResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            creditLimit?: number | null;
+            /** Format: int32 */
+            closingDay: number;
+            /** Format: int32 */
+            dueDay: number;
+            /** Format: uuid */
+            paymentAccountId?: string | null;
+            archived: boolean;
+            used: number;
+            available?: number | null;
+            currentInvoice: components["schemas"]["InvoiceSummary"];
+        };
+        InvoiceSummary: {
+            month: string;
+            /** Format: date */
+            closingDate: string;
+            /** Format: date */
+            dueDate: string;
+            total: number;
+            paidAmount: number;
+            remaining: number;
+            /** @enum {string} */
+            status: "ABERTA" | "FECHADA" | "ATRASADA" | "PAGA";
+        };
+        BudgetRequest: {
+            /** Format: uuid */
+            categoryId: string;
+            month: string;
+            limitAmount: number;
+        };
+        BudgetResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            categoryId: string;
+            month: string;
+            limitAmount: number;
+            spent: number;
+            /** Format: int32 */
+            percent: number;
+            /** @enum {string} */
+            status: "OK" | "ATENCAO" | "ESTOURADO";
+        };
         AssessmentRequest: {
             title: string;
             /** @enum {string|null} */
@@ -641,6 +1131,24 @@ export interface components {
             score?: number | null;
             normalizedScore?: number | null;
             topicIds: string[];
+        };
+        AccountRequest: {
+            name: string;
+            /** @enum {string|null} */
+            kind?: "CORRENTE" | "POUPANCA" | "CARTEIRA" | "INVESTIMENTO" | null;
+            openingBalance?: number | null;
+            archived?: boolean | null;
+        };
+        AccountResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            kind: "CORRENTE" | "POUPANCA" | "CARTEIRA" | "INVESTIMENTO";
+            openingBalance: number;
+            balance: number;
+            projectedBalance: number;
+            archived: boolean;
         };
         ReviewRequest: {
             /** Format: int32 */
@@ -717,6 +1225,19 @@ export interface components {
             classesMissed: number;
             note?: string | null;
         };
+        PayInvoiceRequest: {
+            /** Format: uuid */
+            accountId: string;
+            amount?: number | null;
+            /** Format: date */
+            date?: string | null;
+        };
+        InvoiceResponse: {
+            /** Format: uuid */
+            cardId: string;
+            summary: components["schemas"]["InvoiceSummary"];
+            items: components["schemas"]["TransactionResponse"][];
+        };
         RegisterRequest: {
             name: string;
             /** Format: email */
@@ -757,6 +1278,30 @@ export interface components {
             bySubject: components["schemas"]["StudyBucket"][];
             byDay: components["schemas"]["StudyDay"][];
         };
+        CategoryTotal: {
+            /** Format: uuid */
+            categoryId?: string | null;
+            name: string;
+            color: string;
+            amount: number;
+        };
+        MonthSummary: {
+            month: string;
+            income: number;
+            expense: number;
+            net: number;
+            expenseByCategory: components["schemas"]["CategoryTotal"][];
+            incomeByCategory: components["schemas"]["CategoryTotal"][];
+            totalBalance: number;
+            /** Format: int32 */
+            pendingCount: number;
+            pendingAmount: number;
+        };
+        MonthTotals: {
+            month: string;
+            income: number;
+            expense: number;
+        };
         StatusResponse: {
             signupOpen: boolean;
         };
@@ -769,6 +1314,54 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    updateTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionResponse"];
+                };
+            };
+        };
+    };
+    deleteTransaction: {
+        parameters: {
+            query?: {
+                allInstallments?: boolean;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     updateTopic: {
         parameters: {
             query?: never;
@@ -907,6 +1500,52 @@ export interface operations {
             };
         };
     };
+    updateRecurrence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecurrenceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurrenceResponse"];
+                };
+            };
+        };
+    };
+    deleteRecurrence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     update_1: {
         parameters: {
             query?: never;
@@ -1021,6 +1660,144 @@ export interface operations {
             };
         };
     };
+    updateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryResponse"];
+                };
+            };
+        };
+    };
+    deleteCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CardRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CardResponse"];
+                };
+            };
+        };
+    };
+    deleteCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    budgets: {
+        parameters: {
+            query?: {
+                month?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BudgetResponse"][];
+                };
+            };
+        };
+    };
+    upsertBudget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BudgetRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BudgetResponse"];
+                };
+            };
+        };
+    };
     updateAssessment: {
         parameters: {
             query?: never;
@@ -1064,6 +1841,103 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    updateAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountResponse"];
+                };
+            };
+        };
+    };
+    deleteAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    transactions: {
+        parameters: {
+            query?: {
+                month?: string;
+                from?: string;
+                to?: string;
+                accountId?: string;
+                cardId?: string;
+                categoryId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionResponse"][];
+                };
+            };
+        };
+    };
+    createTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionResponse"][];
+                };
             };
         };
     };
@@ -1272,6 +2146,94 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ResourceResponse"];
+                };
+            };
+        };
+    };
+    recurrences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurrenceResponse"][];
+                };
+            };
+        };
+    };
+    createRecurrence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecurrenceRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurrenceResponse"];
+                };
+            };
+        };
+    };
+    resumeRecurrence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurrenceResponse"];
+                };
+            };
+        };
+    };
+    pauseRecurrence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurrenceResponse"];
                 };
             };
         };
@@ -1491,6 +2453,164 @@ export interface operations {
             };
         };
     };
+    categories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryResponse"][];
+                };
+            };
+        };
+    };
+    createCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryResponse"];
+                };
+            };
+        };
+    };
+    createDefaultCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryResponse"][];
+                };
+            };
+        };
+    };
+    cards: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CardResponse"][];
+                };
+            };
+        };
+    };
+    createCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CardRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CardResponse"];
+                };
+            };
+        };
+    };
+    payInvoice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PayInvoiceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InvoiceResponse"];
+                };
+            };
+        };
+    };
+    copyBudgets: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BudgetResponse"][];
+                };
+            };
+        };
+    };
     register: {
         parameters: {
             query?: never;
@@ -1535,6 +2655,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MeResponse"];
+                };
+            };
+        };
+    };
+    accounts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountResponse"][];
+                };
+            };
+        };
+    };
+    createAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountResponse"];
                 };
             };
         };
@@ -1602,6 +2766,74 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SlotResponse"][];
+                };
+            };
+        };
+    };
+    summary_1: {
+        parameters: {
+            query?: {
+                month?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MonthSummary"];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query?: {
+                until?: string;
+                months?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MonthTotals"][];
+                };
+            };
+        };
+    };
+    invoice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InvoiceResponse"];
                 };
             };
         };
@@ -1712,6 +2944,26 @@ export interface operations {
             header?: never;
             path: {
                 slotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteBudget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
             };
             cookie?: never;
         };

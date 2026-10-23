@@ -130,3 +130,92 @@ function SrTable({ caption, data, format }: { caption: string; data: Datum[]; fo
     </table>
   )
 }
+
+export type Series = { key: string; label: string; color: string }
+export type GroupDatum = { key: string; label: string; values: Record<string, number> }
+
+/**
+ * Colunas agrupadas (ex.: receitas × despesas por mês). Legenda sempre visível; cada grupo mostra
+ * os valores no tooltip; tabela para leitor de tela.
+ */
+export function GroupedColumns({
+  data,
+  series,
+  format,
+  height = 160,
+  caption,
+}: {
+  data: GroupDatum[]
+  series: Series[]
+  format: (v: number) => string
+  height?: number
+  caption: string
+}) {
+  const max = Math.max(...data.flatMap((d) => series.map((s) => d.values[s.key] ?? 0)), 1)
+  return (
+    <figure>
+      <ul className="mb-3 flex flex-wrap gap-4 text-xs text-muted">
+        {series.map((s) => (
+          <li key={s.key} className="flex items-center gap-1.5">
+            <span className="size-2.5 rounded-sm" style={{ background: s.color }} aria-hidden="true" />
+            {s.label}
+          </li>
+        ))}
+      </ul>
+      <div className="flex items-end gap-3 border-b border-line" style={{ height }} aria-hidden="true">
+        {data.map((d) => (
+          <div key={d.key} className="group relative flex h-full flex-1 items-end justify-center gap-0.5">
+            {series.map((s) => {
+              const v = d.values[s.key] ?? 0
+              return (
+                <div
+                  key={s.key}
+                  className="w-full max-w-5 rounded-t group-hover:opacity-80"
+                  style={{ height: v === 0 ? 0 : Math.max(2, (v / max) * (height - 8)), background: s.color }}
+                />
+              )
+            })}
+            <div className="pointer-events-none absolute bottom-full z-10 mb-1 hidden whitespace-nowrap rounded-md bg-ink px-2 py-1 text-xs text-white shadow group-hover:block">
+              <p className="font-medium">{d.label}</p>
+              {series.map((s) => (
+                <p key={s.key}>
+                  {s.label}: {format(d.values[s.key] ?? 0)}
+                </p>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 flex gap-3" aria-hidden="true">
+        {data.map((d) => (
+          <span key={d.key} className="flex-1 truncate text-center text-[11px] text-muted">
+            {d.label}
+          </span>
+        ))}
+      </div>
+      <table className="sr-only">
+        <caption>{caption}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Período</th>
+            {series.map((s) => (
+              <th key={s.key} scope="col">
+                {s.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((d) => (
+            <tr key={d.key}>
+              <th scope="row">{d.label}</th>
+              {series.map((s) => (
+                <td key={s.key}>{format(d.values[s.key] ?? 0)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </figure>
+  )
+}

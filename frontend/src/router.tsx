@@ -7,6 +7,13 @@ import { RecursosPage } from './estudos/RecursosPage'
 import { RevisoesPage } from './estudos/RevisoesPage'
 import { SemestrePage } from './estudos/SemestrePage'
 import { SessoesPage } from './estudos/SessoesPage'
+import { CategoriasPage } from './financas/CategoriasPage'
+import { ContasPage } from './financas/ContasPage'
+import { FinancasLayout } from './financas/FinancasLayout'
+import { LancamentosPage } from './financas/LancamentosPage'
+import { OrcamentoPage } from './financas/OrcamentoPage'
+import { RecorrenciasPage } from './financas/RecorrenciasPage'
+import { VisaoGeralPage } from './financas/VisaoGeralPage'
 import { AgendaPage } from './pages/AgendaPage'
 import { ComingSoonPage } from './pages/ComingSoonPage'
 import { HojePage } from './pages/HojePage'
@@ -33,13 +40,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'financas',
-        element: (
-          <ComingSoonPage
-            title="Finanças"
-            phase={3}
-            items={['Contas e cartões', 'Lançamentos, parcelas e recorrências', 'Orçamento por categoria']}
-          />
-        ),
+        element: <FinancasLayout />,
+        children: [
+          { index: true, element: <VisaoGeralPage /> },
+          { path: 'lancamentos', element: <LancamentosPage /> },
+          { path: 'contas', element: <ContasPage /> },
+          { path: 'orcamento', element: <OrcamentoPage /> },
+          { path: 'recorrencias', element: <RecorrenciasPage /> },
+          { path: 'categorias', element: <CategoriasPage /> },
+        ],
       },
       {
         path: 'saude',

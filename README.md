@@ -50,7 +50,7 @@ Para subir a API também em container: `docker compose --profile api up -d --bui
 backend/                     API Spring Boot
   src/main/java/com/vida/    um pacote por módulo (auth, academico, financas, saude, metas, hoje…)
   src/main/resources/
-    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico…)
+    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico, V4 finanças…)
 frontend/                    SPA React + Vite + TS
 docker-compose.yml           Postgres 18 (+ API no profile "api")
 ```
@@ -76,12 +76,21 @@ Erros da API seguem o formato `application/problem+json`; erros de validação t
 - **Revisão espaçada:** ao revisar um assunto você informa o domínio de 0 a 5, que define a próxima revisão: 1, 2, 4, 7, 15 ou 30 dias.
 - **Sessões de estudo:** apagar uma disciplina ou curso mantém as horas estudadas, que passam a contar como "Sem vínculo".
 
+## Finanças: regras
+
+- **Saldo** nunca é guardado: é o saldo inicial mais a soma dos lançamentos. *Saldo* conta só o que já foi pago/recebido; *previsto* inclui os pendentes.
+- **Transferência** move dinheiro entre contas e não entra como receita nem despesa.
+- **Cartão:** a compra é despesa na data em que foi feita e entra na fatura pelo dia de fechamento (do dia do fechamento em diante, vai para a fatura seguinte). **Pagar a fatura** tira o dinheiro da conta, mas não conta de novo como despesa.
+- **Parcelado:** vira um lançamento por mês; os centavos que sobram ficam na 1ª parcela.
+- **Recorrências** geram os lançamentos sozinhas (ao criar, e depois de hora em hora). Em conta, nascem *pendentes* para você confirmar. Mensal no dia 31 cai no último dia dos meses curtos, e volta para 31 quando o mês tem.
+- **Orçamento** é por categoria e mês, conta as subcategorias e avisa a partir de 80%.
+
 ## Roadmap
 
 0. ~~Esqueleto do projeto~~
 1. ~~Núcleo e autenticação (sessão + CSRF), agenda~~
 2. ~~Acadêmico — semestres, disciplinas, horário, avaliações, faltas, assuntos, cursos, sessões de estudo~~
-3. Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento
+3. ~~Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento~~
 4. Saúde e hábitos — métricas, medições, hábitos com sequência
 5. Metas e planos — metas, marcos, projetos, tarefas
 6. Hoje — visão agregada do dia
