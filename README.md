@@ -33,6 +33,8 @@ npm run dev
 
 Para subir a API também em container: `docker compose --profile api up -d --build`.
 
+**Primeiro acesso:** enquanto não existe nenhum usuário, a tela de login vira "Criar conta". Depois do primeiro cadastro ela fica fechada (uso pessoal). Para aceitar novos cadastros, rode a API com `VIDA_AUTH_SIGNUP_OPEN=true`.
+
 ## Comandos úteis
 
 | Onde | Comando | O que faz |
@@ -52,17 +54,24 @@ frontend/                    SPA React + Vite + TS
 docker-compose.yml           Postgres 18 (+ API no profile "api")
 ```
 
+## Autenticação
+
+Sessão no servidor com cookie `httpOnly` (sem JWT). Como front e API ficam no mesmo domínio (proxy do Vite em dev), o navegador manda o cookie sozinho. Requisições que alteram dados levam o token CSRF: a API grava o cookie `XSRF-TOKEN` e o front devolve o valor no header `X-XSRF-TOKEN` (`frontend/src/api/client.ts`).
+
+Erros da API seguem o formato `application/problem+json`; erros de validação trazem `errors: {campo: mensagem}`.
+
 ## Convenções do banco
 
 - Chave primária `uuid` gerada com `uuidv7()` (ordenada no tempo, não adivinhável).
 - `user_id` em todas as tabelas e chaves estrangeiras compostas `(x_id, user_id)`: o banco não aceita ligar dados de usuários diferentes.
 - Dinheiro em `numeric(14,2)`, dias em `date`, instantes em `timestamptz`.
 - Saldos, médias e progresso são calculados, nunca armazenados.
+- Nos records de request/response, campo sem `@Nullable` é obrigatório no OpenAPI; com `@Nullable`, opcional e pode ser `null`. É isso que define os tipos gerados no front.
 
 ## Roadmap
 
 0. ~~Esqueleto do projeto~~
-1. Núcleo e autenticação (sessão + CSRF)
+1. ~~Núcleo e autenticação (sessão + CSRF), agenda~~
 2. Acadêmico — semestres, disciplinas, horário, avaliações, faltas, assuntos, cursos, sessões de estudo
 3. Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento
 4. Saúde e hábitos — métricas, medições, hábitos com sequência

@@ -16,11 +16,24 @@ spring:
   flyway:
     locations: classpath:db/migration
 
+  mvc:
+    problemdetails:
+      enabled: true
+
 server:
   servlet:
     context-path: /api
-  error:
-    include-message: always
+    session:
+      timeout: 14d
+      cookie:
+        http-only: true
+        same-site: lax
+        max-age: 14d
+
+vida:
+  auth:
+    # false = só o primeiro cadastro é aceito (uso pessoal)
+    signup-open: false
 
 management:
   endpoints:
