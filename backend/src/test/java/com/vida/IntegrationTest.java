@@ -2,9 +2,13 @@ package com.vida;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.jayway.jsonpath.JsonPath;
 import com.vida.auth.User;
 import com.vida.auth.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -17,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 /** Base dos testes de API: contexto completo, Postgres real e banco limpo a cada teste. */
 @SpringBootTest
@@ -62,5 +67,32 @@ public abstract class IntegrationTest {
 
     protected int storedSessions() {
         return jdbc.queryForObject("select count(*) from spring_session", Integer.class);
+    }
+
+    // ---------- atalhos para chamadas JSON autenticadas ----------
+
+    protected ResultActions getJson(Cookie session, String path) throws Exception {
+        return mvc.perform(get(path).cookie(session));
+    }
+
+    protected ResultActions postJson(Cookie session, String path, String body) throws Exception {
+        return mvc.perform(post(path).cookie(session).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    protected ResultActions putJson(Cookie session, String path, String body) throws Exception {
+        return mvc.perform(put(path).cookie(session).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    protected ResultActions deleteJson(Cookie session, String path) throws Exception {
+        return mvc.perform(delete(path).cookie(session).with(csrf()));
+    }
+
+    /** POST que deve criar (201); devolve o id criado. */
+    protected String create(Cookie session, String path, String body) throws Exception {
+        String json = postJson(session, path, body).andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return JsonPath.read(json, "$.id");
     }
 }

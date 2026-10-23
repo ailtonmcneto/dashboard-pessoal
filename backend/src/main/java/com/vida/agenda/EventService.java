@@ -5,6 +5,7 @@ import com.vida.agenda.EventDtos.EventRequest;
 import com.vida.common.BusinessException;
 import com.vida.common.CurrentUser;
 import com.vida.common.NotFoundException;
+import com.vida.common.Strings;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -66,10 +67,6 @@ public class EventService {
             throw BusinessException.badRequest("O fim não pode ser antes do início");
         }
         event.update(req.title().strip(), req.kind() == null ? Kind.COMPROMISSO : req.kind(),
-                req.startsAt(), req.endsAt(), blankToNull(req.location()), blankToNull(req.notes()));
-    }
-
-    private static String blankToNull(String s) {
-        return s == null || s.isBlank() ? null : s.strip();
+                req.startsAt(), req.endsAt(), Strings.clean(req.location()), Strings.clean(req.notes()));
     }
 }
