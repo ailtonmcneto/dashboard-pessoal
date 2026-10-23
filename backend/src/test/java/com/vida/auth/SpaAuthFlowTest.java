@@ -36,7 +36,7 @@ class SpaAuthFlowTest {
 
     @BeforeEach
     void cleanDatabase() {
-        jdbc.execute("truncate table users cascade");
+        jdbc.execute("truncate table users, spring_session cascade");
     }
 
     private URI uri(String path) {

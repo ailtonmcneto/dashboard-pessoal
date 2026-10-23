@@ -1,5 +1,6 @@
 package com.vida.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -7,9 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.vida.IntegrationTest;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
 
 class AuthApiTest extends IntegrationTest {
 
@@ -20,14 +21,14 @@ class AuthApiTest extends IntegrationTest {
     void primeiroCadastroLogaENormalizaEmail() throws Exception {
         mvc.perform(get("/auth/status")).andExpect(jsonPath("$.signupOpen").value(true));
 
-        MockHttpSession session = new MockHttpSession();
-        mvc.perform(post("/auth/register").session(session).with(csrf())
+        Cookie session = mvc.perform(post("/auth/register").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON).content(REGISTER))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value("eu@exemplo.com"))
-                .andExpect(jsonPath("$.timezone").value("America/Sao_Paulo"));
+                .andExpect(jsonPath("$.timezone").value("America/Sao_Paulo"))
+                .andReturn().getResponse().getCookie(SESSION_COOKIE);
 
-        mvc.perform(get("/auth/me").session(session))
+        mvc.perform(get("/auth/me").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Ailton"));
         mvc.perform(get("/auth/status")).andExpect(jsonPath("$.signupOpen").value(false));
@@ -63,9 +64,9 @@ class AuthApiTest extends IntegrationTest {
 
     @Test
     void postSemCsrfEhRecusado() throws Exception {
-        MockHttpSession session = loginAs("eu@exemplo.com");
+        Cookie session = loginAs("eu@exemplo.com");
 
-        mvc.perform(post("/events").session(session)
+        mvc.perform(post("/events").cookie(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title": "x", "startsAt": "2026-11-01T12:00:00Z"}"""))
@@ -74,11 +75,27 @@ class AuthApiTest extends IntegrationTest {
 
 
     @Test
-    void logoutEncerraASessao() throws Exception {
-        MockHttpSession session = loginAs("eu@exemplo.com");
+    void sessaoFicaNoBancoELogoutApaga() throws Exception {
+        Cookie session = loginAs("eu@exemplo.com");
+        assertThat(storedSessions()).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select principal_name from spring_session", String.class))
+                .isEqualTo("eu@exemplo.com");
 
-        mvc.perform(post("/auth/logout").session(session).with(csrf())).andExpect(status().isNoContent());
-        mvc.perform(get("/auth/me").session(session)).andExpect(status().isUnauthorized());
+        mvc.perform(post("/auth/logout").cookie(session).with(csrf())).andExpect(status().isNoContent());
+        assertThat(storedSessions()).isZero();
+        mvc.perform(get("/auth/me").cookie(session)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void sessaoNaoDependeDaMemoriaDaApi() throws Exception {
+        Cookie session = loginAs("eu@exemplo.com");
+
+        // Simula outra instância/um restart: nada em memória, só o cookie e a linha no banco.
+        Cookie copia = new Cookie(SESSION_COOKIE, session.getValue());
+        mvc.perform(get("/auth/me").cookie(copia)).andExpect(status().isOk());
+
+        jdbc.update("delete from spring_session");
+        mvc.perform(get("/auth/me").cookie(copia)).andExpect(status().isUnauthorized());
     }
 
     @Test

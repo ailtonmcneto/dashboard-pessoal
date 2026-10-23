@@ -15,6 +15,10 @@ spring:
           time_zone: UTC
   flyway:
     locations: classpath:db/migration
+  session:
+    jdbc:
+      # as tabelas vêm da migração V2 (Flyway), não do Spring Session
+      initialize-schema: never
 
   mvc:
     problemdetails:

@@ -6,6 +6,7 @@ Painel para organizar a vida: **estudos** (faculdade, cursos, projetos), **finan
 |---|---|
 | API | Java 25 · Spring Boot 4 (Web MVC, Data JPA, Validation, Security) · Flyway · springdoc-openapi |
 | Banco | PostgreSQL 18 (ids `uuidv7()`) |
+| Sessão | Spring Session JDBC (no próprio Postgres) |
 | Web | React · Vite · TypeScript · TanStack Query · React Router · Tailwind CSS |
 | Testes | JUnit 5 · Testcontainers (Postgres real) |
 
@@ -56,7 +57,7 @@ docker-compose.yml           Postgres 18 (+ API no profile "api")
 
 ## Autenticação
 
-Sessão no servidor com cookie `httpOnly` (sem JWT). Como front e API ficam no mesmo domínio (proxy do Vite em dev), o navegador manda o cookie sozinho. Requisições que alteram dados levam o token CSRF: a API grava o cookie `XSRF-TOKEN` e o front devolve o valor no header `X-XSRF-TOKEN` (`frontend/src/api/client.ts`).
+Sessão no servidor com cookie `httpOnly` (sem JWT), guardada no Postgres pelo Spring Session JDBC (tabelas `spring_session*`, migração V2): reiniciar a API não desloga, e a sessão dura 14 dias. Como front e API ficam no mesmo domínio (proxy do Vite em dev), o navegador manda o cookie sozinho. Requisições que alteram dados levam o token CSRF: a API grava o cookie `XSRF-TOKEN` e o front devolve o valor no header `X-XSRF-TOKEN` (`frontend/src/api/client.ts`).
 
 Erros da API seguem o formato `application/problem+json`; erros de validação trazem `errors: {campo: mensagem}`.
 
