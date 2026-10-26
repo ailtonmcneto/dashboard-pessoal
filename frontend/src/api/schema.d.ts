@@ -932,6 +932,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/hoje": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["hoje"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/habits/{id}/history": {
         parameters: {
             query?: never;
@@ -1906,6 +1922,40 @@ export interface components {
             date: string;
             value?: number | null;
             met?: boolean | null;
+        };
+        Alert: {
+            /** @enum {string} */
+            kind: "CONTA_VENCIDA" | "FATURA" | "PROVA_PROXIMA" | "FALTAS" | "NOTA_EM_RISCO" | "TAREFA_ATRASADA" | "ORCAMENTO" | "META_ATRASADA";
+            /** @enum {string} */
+            severity: "CRITICA" | "ATENCAO";
+            title: string;
+            detail: string;
+            link: string;
+        };
+        HojeResponse: {
+            /** Format: date */
+            date: string;
+            alerts: components["schemas"]["Alert"][];
+            tasks: components["schemas"]["TaskResponse"][];
+            classes: components["schemas"]["SlotResponse"][];
+            assessments: components["schemas"]["AssessmentResponse"][];
+            events: components["schemas"]["EventResponse"][];
+            /** Format: int32 */
+            reviewsDue: number;
+            reviews: components["schemas"]["TopicResponse"][];
+            habits: components["schemas"]["HabitResponse"][];
+            metrics: components["schemas"]["MetricResponse"][];
+            money: components["schemas"]["Money"];
+            /** Format: int32 */
+            studyMinutesWeek: number;
+        };
+        Money: {
+            totalBalance: number;
+            income: number;
+            expense: number;
+            /** Format: int32 */
+            pendingCount: number;
+            pendingAmount: number;
         };
         CategoryTotal: {
             /** Format: uuid */
@@ -4202,6 +4252,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DayValue"][];
+                };
+            };
+        };
+    };
+    hoje: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HojeResponse"];
                 };
             };
         };

@@ -1,6 +1,6 @@
 # Contexto do projeto — Vida (dashboard pessoal)
 
-Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 5**.
+Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 6**.
 
 ---
 
@@ -61,6 +61,7 @@ backend/
                  HabitStats (sequência/semana/taxa), MetricService, HabitService, HealthController
     metas/       Goal, Milestone, Project, Task, GoalProgress (percentual e ritmo),
                  GoalService, ProjectService, TaskService, GoalController
+    hoje/        HojeService (junta os services públicos dos módulos e calcula alertas), HojeController
   src/main/resources/
     application.yml
     db/migration/  V1__core.sql, V2__spring_session.sql, V3__academico.sql, V4__financas.sql, V5__saude.sql, V6__metas.sql
@@ -109,7 +110,7 @@ contexto.md          este arquivo
 
 ### Frontend
 - **Tipos:** gerados do OpenAPI (`npm run api:types`, com a API rodando) e reexportados com nomes amigáveis em `api/types.ts`.
-- **Leitura e escrita:**
+- **Leitura e escrita** (toda gravação também recarrega `/hoje`, em segundo plano e sem `await`, para não atrasar o `onSuccess` de quem chamou):
   - `useGet(path)` usa o próprio caminho como chave de cache: `['api', ...segmentos, query]`.
   - `useSend(method, path, prefixos)` invalida por prefixo. Cada módulo recarrega o módulo inteiro ao gravar, porque tudo nele se relaciona.
 - **Formulários:** não controlados, lidos com `formData(form)` (`lib/forms.ts`).
@@ -227,7 +228,19 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
   - Tarefas também na página da disciplina e no cartão "Tarefas de hoje" da tela Hoje.
   - As caixas de concluir tarefa e marco são otimistas: marcam na hora e voltam se a API falhar.
 
-### Testes (62 no backend, todos passando)
+### Fase 6 — Hoje
+- **Endpoint:** `GET /hoje` (pacote `hoje`) monta a tela inteira reaproveitando os services públicos de cada módulo. Retorna:
+  - tarefas de hoje e atrasadas, aulas do dia, provas dos próximos 14 dias, eventos dos próximos 7;
+  - assuntos para revisar (quantidade + 5 primeiros), hábitos devidos hoje, métricas com meta;
+  - dinheiro do mês e minutos estudados na semana.
+- **Alertas** (CRITICA antes de ATENCAO), cada um com link:
+  - **Finanças:** CONTA_VENCIDA (despesa em conta não paga com data passada); FATURA (a fatura fechada: atrasada, ou vencendo em até 5 dias); ORCAMENTO (≥ 80% ou estourado, com o nome da categoria).
+  - **Estudos:** PROVA_PROXIMA (hoje = crítica; amanhã = atenção); FALTAS (perto ou estourado); NOTA_EM_RISCO (em risco, ou média fora de alcance).
+  - **Metas:** TAREFA_ATRASADA e META_ATRASADA.
+- **Tela:** cartão "Atenção" (ou "Tudo em dia"), faixa de resumo e cartões. Concluir tarefa, marcar hábito e registrar métrica funcionam na própria tela.
+- **Integrações públicas novas:** `ReportService.overdueBills()` e `EventResponse.of` público.
+
+### Testes (65 no backend, todos passando)
 
 | Classe | Testes | O que cobre |
 |---|---|---|
@@ -244,11 +257,12 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
 | `HealthApiTest` | 5 | API de saúde e hábitos |
 | `GoalProgressTest` | 3 | percentual, esperado e ritmo |
 | `GoalApiTest` | 5 | API de metas, marcos, projetos e tarefas |
+| `HojeApiTest` | 3 | tela vazia, cenário com todos os alertas, isolamento |
 | `VidaApplicationTests` | 1 | contexto sobe com Postgres 18 |
 
 Todo módulo tem teste de **isolamento entre usuários** (o outro usuário recebe 404) e pelo menos um teste mostrando que a **FK composta barra o vínculo cruzado direto no banco**.
 
-O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das cinco fases foram testados no Chromium com Playwright, incluindo o layout no celular.
+O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das seis fases foram testados no Chromium com Playwright, incluindo o layout no celular.
 
 ---
 
@@ -297,14 +311,5 @@ O autor já tem JDK 25, Node 22+ e Docker instalados na máquina.
 
 ## 9. Próximas fases (plano aprovado)
 
-### Fase 6 — Hoje
-Endpoint agregado `GET /api/hoje` e a tela inicial definitiva, reunindo:
-- aulas do dia e avaliações próximas;
-- tarefas vencendo ou atrasadas;
-- hábitos a marcar;
-- faltas em risco;
-- orçamento do mês e contas a pagar;
-- minutos estudados na semana;
-- eventos.
-
-Hoje a tela Hoje já monta esses cartões chamando vários endpoints.
+### Fase 7 — Edição
+Editar pela tela, com o mesmo formulário da criação, o que hoje só dá para criar, arquivar e apagar: disciplina, lançamento, recorrência, hábito, métrica, meta e tarefa. Junto, escolher o assunto ao registrar uma sessão de estudo e ligar assuntos a uma prova.

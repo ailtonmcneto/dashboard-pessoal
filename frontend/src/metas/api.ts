@@ -11,10 +11,11 @@ export type TaskFilter = { goalId?: string; projectId?: string; courseId?: strin
 export const useGoals = () => useGet<Goal[]>('/goals')
 export const useGoal = (id: string) => useGet<Goal>(`/goals/${id}`)
 export const useProjects = () => useGet<Project[]>('/projects')
-export const useTasks = (view: TaskView, filter: TaskFilter = {}) => {
+/** {@code enabled = false} quando a lista já veio de outro lugar (ex.: a tela Hoje). */
+export const useTasks = (view: TaskView, filter: TaskFilter = {}, enabled = true) => {
   const qs = new URLSearchParams({ view })
   Object.entries(filter).forEach(([k, v]) => v && qs.set(k, v))
-  return useGet<Task[]>(`/tasks?${qs}`)
+  return useGet<Task[]>(enabled ? `/tasks?${qs}` : null)
 }
 
 export const useCreateGoal = () => useSend<GoalRequest, Goal>('POST', () => '/goals', ALL)

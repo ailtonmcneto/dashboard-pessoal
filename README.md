@@ -98,6 +98,10 @@ Erros da API seguem o formato `application/problem+json`; erros de validação t
 - **Tarefas** formam uma lista só, com visões *Hoje* (vencidas e de hoje), *Próximos 7 dias*, *Todas abertas* e *Feitas*. Cada tarefa pode ser de uma meta, de um marco (aí conta para a meta dele), de um projeto e/ou de uma disciplina. Apagar meta, projeto ou disciplina não apaga as tarefas.
 - **Projetos** mostram o progresso pelas tarefas e avisam quando passam do prazo.
 
+## Hoje
+
+A tela inicial vem de uma chamada só (`GET /api/hoje`) e começa pelos **alertas do dia**, críticos primeiro, cada um com link para onde resolver: conta vencida, fatura vencendo ou atrasada, prova hoje ou amanhã, faltas perto ou acima do limite, nota em risco, tarefa atrasada, orçamento perto ou estourado e meta atrasada. Depois vêm um resumo (tarefas, hábitos, aulas, estudo na semana, saldo) e os cartões, onde dá para concluir tarefas, marcar hábitos e registrar métricas sem sair da tela. Qualquer gravação no app recarrega a tela Hoje em segundo plano.
+
 ## Roadmap
 
 0. ~~Esqueleto do projeto~~
@@ -106,6 +110,7 @@ Erros da API seguem o formato `application/problem+json`; erros de validação t
 3. ~~Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento~~
 4. ~~Saúde e hábitos — métricas, medições, hábitos com sequência~~
 5. ~~Metas e planos — metas, marcos, projetos, tarefas~~
-6. Hoje — visão agregada do dia
+6. ~~Hoje — visão agregada do dia~~
+7. Edição — editar pela tela o que hoje só dá para criar, arquivar e apagar
 
 Depois da v1: controle de remédios, lembretes, importação de extrato, PWA.

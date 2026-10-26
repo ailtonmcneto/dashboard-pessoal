@@ -25,9 +25,14 @@ export function useSend<Body, Res = unknown>(
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (body: Body) => api<Res>(path(body), method, method === 'DELETE' ? undefined : body),
-    onSuccess: () =>
-      Promise.all(
+    onSuccess: () => {
+      // a tela Hoje junta tudo, então qualquer gravação a deixa desatualizada. Ela é recarregada em
+      // segundo plano (sem await): esperar por ela atrasaria o fim da mutação e, com isso, o
+      // onSuccess de quem chamou (ex.: limpar o formulário enquanto a pessoa já digita o próximo)
+      void qc.invalidateQueries({ queryKey: ['api', 'hoje'], refetchType: 'all' })
+      return Promise.all(
         invalidate.map((prefix) => qc.invalidateQueries({ queryKey: ['api', prefix], refetchType: 'all' })),
-      ),
+      )
+    },
   })
 }

@@ -88,3 +88,7 @@ export type ProjectStatus = Project['status']
 export type Task = Schemas['TaskResponse']
 export type TaskRequest = Schemas['TaskRequest']
 export type TaskView = 'HOJE' | 'SEMANA' | 'ABERTAS' | 'FEITAS'
+
+// Hoje
+export type Hoje = Schemas['HojeResponse']
+export type HojeAlert = Schemas['Alert']

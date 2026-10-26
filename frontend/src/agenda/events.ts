@@ -25,7 +25,11 @@ export function useCreateEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (req: EventRequest) => api<EventItem>('/events', 'POST', req),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'], refetchType: 'all' }),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ['events'], refetchType: 'all' }),
+        qc.invalidateQueries({ queryKey: ['api', 'hoje'], refetchType: 'all' }),
+      ]),
   })
 }
 
@@ -33,6 +37,10 @@ export function useDeleteEvent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api<void>(`/events/${id}`, 'DELETE'),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'], refetchType: 'all' }),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ['events'], refetchType: 'all' }),
+        qc.invalidateQueries({ queryKey: ['api', 'hoje'], refetchType: 'all' }),
+      ]),
   })
 }

@@ -78,14 +78,18 @@ export function TaskList({
   empty = 'Nenhuma tarefa.',
   showLinks = true,
   addable = true,
+  items,
 }: {
   view?: TaskView
   filter?: TaskFilter
   empty?: string
   showLinks?: boolean
   addable?: boolean
+  /** Lista já carregada (não busca de novo). */
+  items?: Task[]
 }) {
-  const tasks = useTasks(view, filter)
+  const fetched = useTasks(view, filter, items === undefined)
+  const tasks = items === undefined ? fetched : { isPending: false, isError: false, error: null, data: items }
   const create = useCreateTask()
   const [due, setDue] = useState(view === 'HOJE' ? todayIso() : '')
 
