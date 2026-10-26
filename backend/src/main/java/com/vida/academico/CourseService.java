@@ -91,6 +91,20 @@ public class CourseService {
         courses.delete(find(id));
     }
 
+    /** Para outros módulos: garante que a disciplina existe e é do usuário (senão 404). */
+    public void requireOwned(UUID id) {
+        find(id);
+    }
+
+    /** Para outros módulos: nome de cada disciplina pedida (as de outros usuários ficam de fora). */
+    @Transactional(readOnly = true)
+    public Map<UUID, String> names(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return findAll(ids).values().stream().collect(Collectors.toMap(Course::getId, Course::getName));
+    }
+
     Course find(UUID id) {
         return courses.findByIdAndUserId(id, currentUser.id())
                 .orElseThrow(() -> new NotFoundException("Disciplina"));

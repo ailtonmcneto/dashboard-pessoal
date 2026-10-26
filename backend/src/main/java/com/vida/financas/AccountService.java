@@ -7,6 +7,7 @@ import com.vida.financas.FinanceDtos.AccountRequest;
 import com.vida.financas.FinanceDtos.AccountResponse;
 import com.vida.financas.FinanceQueries.Balance;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -66,6 +67,19 @@ public class AccountService {
             throw BusinessException.conflict("A conta tem lançamentos; arquive-a em vez de apagar");
         }
         accounts.delete(account);
+    }
+
+    /** Para outros módulos: garante que a conta existe e é do usuário (senão 404). */
+    public String requireOwned(UUID id) {
+        return find(id).getName();
+    }
+
+    /** Para outros módulos: saldo pago de cada conta do usuário. */
+    @Transactional(readOnly = true)
+    public Map<UUID, BigDecimal> paidBalances() {
+        Map<UUID, BigDecimal> result = new HashMap<>();
+        queries.accountBalances(currentUser.id()).forEach((id, b) -> result.put(id, b.paid()));
+        return result;
     }
 
     Account find(UUID id) {
