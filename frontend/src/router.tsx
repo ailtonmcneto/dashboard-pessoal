@@ -14,8 +14,12 @@ import { LancamentosPage } from './financas/LancamentosPage'
 import { OrcamentoPage } from './financas/OrcamentoPage'
 import { RecorrenciasPage } from './financas/RecorrenciasPage'
 import { VisaoGeralPage } from './financas/VisaoGeralPage'
+import { MetasLayout } from './metas/MetasLayout'
+import { ObjetivoPage } from './metas/ObjetivoPage'
+import { ObjetivosPage } from './metas/ObjetivosPage'
+import { ProjetosPage } from './metas/ProjetosPage'
+import { TarefasPage } from './metas/TarefasPage'
 import { AgendaPage } from './pages/AgendaPage'
-import { ComingSoonPage } from './pages/ComingSoonPage'
 import { HojePage } from './pages/HojePage'
 import { LoginPage } from './pages/LoginPage'
 import { HabitosPage } from './saude/HabitosPage'
@@ -65,9 +69,13 @@ export const router = createBrowserRouter([
       },
       {
         path: 'metas',
-        element: (
-          <ComingSoonPage title="Metas e planos" phase={5} items={['Metas com marcos', 'Projetos', 'Tarefas']} />
-        ),
+        element: <MetasLayout />,
+        children: [
+          { index: true, element: <TarefasPage /> },
+          { path: 'objetivos', element: <ObjetivosPage /> },
+          { path: 'objetivos/:id', element: <ObjetivoPage /> },
+          { path: 'projetos', element: <ProjetosPage /> },
+        ],
       },
     ],
   },

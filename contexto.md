@@ -1,6 +1,6 @@
 # Contexto do projeto — Vida (dashboard pessoal)
 
-Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 4**.
+Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 5**.
 
 ---
 
@@ -59,9 +59,11 @@ backend/
                  services e FinanceController
     saude/       MetricType, Measurement, Habit, HabitCheck, DailyValues (valor do dia),
                  HabitStats (sequência/semana/taxa), MetricService, HabitService, HealthController
+    metas/       Goal, Milestone, Project, Task, GoalProgress (percentual e ritmo),
+                 GoalService, ProjectService, TaskService, GoalController
   src/main/resources/
     application.yml
-    db/migration/  V1__core.sql, V2__spring_session.sql, V3__academico.sql, V4__financas.sql, V5__saude.sql
+    db/migration/  V1__core.sql, V2__spring_session.sql, V3__academico.sql, V4__financas.sql, V5__saude.sql, V6__metas.sql
   src/test/      IntegrationTest (base), TestcontainersConfig, testes por módulo
                  resources/application.properties (vida.jobs.enabled=false)
 frontend/
@@ -72,7 +74,8 @@ frontend/
   src/estudos/   páginas e hooks do acadêmico
   src/financas/  páginas e hooks de finanças
   src/saude/     hábitos (com calendário) e métricas (com gráfico)
-  src/pages/     Hoje, Agenda, Login, "em breve"
+  src/metas/     tarefas (TaskList reutilizável), metas com marcos e projetos
+  src/pages/     Hoje, Agenda, Login
   src/router.tsx
 docker-compose.yml   Postgres 18 (+ API no profile "api")
 README.md            como rodar, regras de negócio, roadmap
@@ -101,6 +104,7 @@ contexto.md          este arquivo
   - Violação de constraint que escapar das validações vira 409.
 - **Contrato OpenAPI:** campo de record sem `@Nullable` (JSpecify) é obrigatório; com `@Nullable`, é opcional e aceita `null`. Quem aplica isso é o `RecordNullabilityConverter`, e é o que mantém os tipos do front corretos.
 - **Migrações:** uma por fase, SQL puro, comentadas. Sempre `unique (id, user_id)` e FKs compostas. Em FK opcional, `on delete set null (coluna)` zera só o vínculo.
+- **Entre módulos:** um módulo não acessa repositórios de outro. Usa métodos públicos dos services, como `AccountService.requireOwned`/`paidBalances` e `CourseService.requireOwned`/`names`.
 - **Jobs:** `@Scheduled`, ligados por `vida.jobs.enabled` (desligado nos testes).
 
 ### Frontend
@@ -205,7 +209,25 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
   - Detalhe da métrica com gráfico de 7, 30 ou 90 dias: colunas para soma, linha para média ou último.
   - Tela Hoje com "Hábitos de hoje" (marcar ali mesmo) e "Saúde hoje" (métricas com meta e registro rápido).
 
-### Testes (54 no backend, todos passando)
+### Fase 5 — Metas e planos (V6)
+- **Tabelas:** `goals`, `milestones`, `projects`, `tasks`. Os vínculos de tarefa e projeto usam `on delete set null (coluna)`.
+- **Regras:**
+  - **Progresso** por `progress_mode`: MANUAL, MARCOS, TAREFAS ou FINANCEIRO (saldo pago da conta ÷ alvo), limitado a 0–100.
+  - **Esperado:** dias decorridos ÷ dias entre início e prazo. O início vale hoje se não for informado.
+  - **Ritmo:** ADIANTADA (≥ esperado + 10), NO_RITMO, ATRASADA (< esperado − 10, ou prazo vencido). Também CONCLUIDA, ABANDONADA e SEM_PRAZO.
+  - **Status:** concluir guarda `completed_on`; reabrir limpa.
+  - **Tarefas:** tarefa de um marco recebe a meta do marco; marco de outra meta dá 400. As visões são HOJE, SEMANA, ABERTAS e FEITAS (30 dias). Ordem: prazo (vazio no fim), depois prioridade.
+- **Endpoints:**
+  - **Metas e marcos:** `/goals`, `/goals/{id}`, `/goals/{id}/status`, `/goals/{id}/milestones`, `/milestones/{id}` (+ `/done`, `/undone`).
+  - **Projetos:** `/projects`.
+  - **Tarefas:** `/tasks?view&goalId&projectId&courseId`, `/tasks/{id}/done|undone`.
+- **Telas:**
+  - Metas e planos com abas Tarefas (visões), Metas (cards com barra, marca do esperado e ritmo) e Projetos (status, progresso, tarefas expansíveis).
+  - Detalhe da meta: concluir, abandonar ou reabrir; atualizar o valor manual; marcos; tarefas.
+  - Tarefas também na página da disciplina e no cartão "Tarefas de hoje" da tela Hoje.
+  - As caixas de concluir tarefa e marco são otimistas: marcam na hora e voltam se a API falhar.
+
+### Testes (62 no backend, todos passando)
 
 | Classe | Testes | O que cobre |
 |---|---|---|
@@ -220,11 +242,13 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
 | `HabitStatsTest` | 5 | sequências: diário, dias fixos, X por semana, início |
 | `DailyValuesTest` | 3 | valor do dia no fuso; metas mínima e máxima |
 | `HealthApiTest` | 5 | API de saúde e hábitos |
+| `GoalProgressTest` | 3 | percentual, esperado e ritmo |
+| `GoalApiTest` | 5 | API de metas, marcos, projetos e tarefas |
 | `VidaApplicationTests` | 1 | contexto sobe com Postgres 18 |
 
 Todo módulo tem teste de **isolamento entre usuários** (o outro usuário recebe 404) e pelo menos um teste mostrando que a **FK composta barra o vínculo cruzado direto no banco**.
 
-O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das quatro fases foram testados no Chromium com Playwright, incluindo o layout no celular.
+O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das cinco fases foram testados no Chromium com Playwright, incluindo o layout no celular.
 
 ---
 
@@ -261,6 +285,10 @@ O autor já tem JDK 25, Node 22+ e Docker instalados na máquina.
   - Importar extrato.
 - **Saúde:**
   - Editar nome, frequência ou meta de um hábito ou métrica já criados (só arquivar e apagar pela tela).
+- **Metas:**
+  - Editar título, prazo ou modo de uma meta pela tela (a API aceita; a tela atualiza só o valor manual e o status).
+  - Editar uma tarefa já criada (título, prazo, vínculos).
+  - Metas dentro de metas (deixadas de fora; os marcos cobrem as etapas).
 - **Geral:**
   - Tema escuro.
   - Remédios, lembretes e PWA (depois da v1).
@@ -268,15 +296,6 @@ O autor já tem JDK 25, Node 22+ e Docker instalados na máquina.
 ---
 
 ## 9. Próximas fases (plano aprovado)
-
-### Fase 5 — Metas e planos (migração V6)
-- `goals`:
-  - área (estudos, finanças, saúde, pessoal, carreira) e período (trimestre, ano, livre);
-  - status e meta-pai;
-  - `progress_mode` (manual, marcos, tarefas, financeiro), com `account_id` opcional para metas de dinheiro.
-- `milestones`, `projects` (estudo ou pessoal; podem ligar a uma meta e a uma disciplina).
-- `tasks`: uma lista única de tarefas ligável a meta, marco, projeto ou disciplina.
-- "Planos" são metas com marcos, mais uma conta vinculada quando envolvem dinheiro.
 
 ### Fase 6 — Hoje
 Endpoint agregado `GET /api/hoje` e a tela inicial definitiva, reunindo:

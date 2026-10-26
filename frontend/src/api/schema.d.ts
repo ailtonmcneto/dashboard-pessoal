@@ -52,6 +52,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tasks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateTask"];
+        post?: never;
+        delete: operations["deleteTask"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resources/{id}": {
         parameters: {
             query?: never;
@@ -79,6 +95,38 @@ export interface paths {
         put: operations["updateRecurrence"];
         post?: never;
         delete: operations["deleteRecurrence"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateProject"];
+        post?: never;
+        delete: operations["deleteProject"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/milestones/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateMilestone"];
+        post?: never;
+        delete: operations["deleteMilestone"];
         options?: never;
         head?: never;
         patch?: never;
@@ -127,6 +175,38 @@ export interface paths {
         put: operations["check"];
         post?: never;
         delete: operations["uncheck"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/goals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["goal"];
+        put: operations["updateGoal"];
+        post?: never;
+        delete: operations["deleteGoal"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/goals/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["setGoalStatus"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -308,6 +388,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["tasks"];
+        put?: never;
+        post: operations["createTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks/{id}/undone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["taskUndone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks/{id}/done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["taskDone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/study-sessions": {
         parameters: {
             query?: never;
@@ -388,6 +516,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["projects"];
+        put?: never;
+        post: operations["createProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/milestones/{id}/undone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["milestoneUndone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/milestones/{id}/done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["milestoneDone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/metrics": {
         parameters: {
             query?: never;
@@ -446,6 +622,38 @@ export interface paths {
         get: operations["habits"];
         put?: never;
         post: operations["createHabit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["goals"];
+        put?: never;
+        post: operations["createGoal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/goals/{id}/milestones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addMilestone"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1031,6 +1239,47 @@ export interface components {
             passingGrade: number;
             current: boolean;
         };
+        TaskRequest: {
+            title: string;
+            notes?: string | null;
+            /** Format: int32 */
+            priority?: number | null;
+            /** Format: date */
+            dueOn?: string | null;
+            /** Format: uuid */
+            goalId?: string | null;
+            /** Format: uuid */
+            milestoneId?: string | null;
+            /** Format: uuid */
+            projectId?: string | null;
+            /** Format: uuid */
+            courseId?: string | null;
+        };
+        TaskResponse: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            notes?: string | null;
+            /** Format: int32 */
+            priority: number;
+            /** Format: date */
+            dueOn?: string | null;
+            done: boolean;
+            /** Format: date-time */
+            doneAt?: string | null;
+            overdue: boolean;
+            /** Format: uuid */
+            goalId?: string | null;
+            goalTitle?: string | null;
+            /** Format: uuid */
+            milestoneId?: string | null;
+            /** Format: uuid */
+            projectId?: string | null;
+            projectTitle?: string | null;
+            /** Format: uuid */
+            courseId?: string | null;
+            courseName?: string | null;
+        };
         ResourceRequest: {
             title: string;
             /** @enum {string|null} */
@@ -1112,6 +1361,105 @@ export interface components {
             /** Format: int32 */
             generated: number;
         };
+        ProjectRequest: {
+            title: string;
+            description?: string | null;
+            /** @enum {string|null} */
+            kind?: "ESTUDO" | "PESSOAL" | "TRABALHO" | null;
+            /** @enum {string|null} */
+            status?: "PLANEJADO" | "ATIVO" | "PAUSADO" | "CONCLUIDO" | null;
+            /** Format: date */
+            startsOn?: string | null;
+            /** Format: date */
+            dueOn?: string | null;
+            url?: string | null;
+            /** Format: uuid */
+            goalId?: string | null;
+            /** Format: uuid */
+            courseId?: string | null;
+        };
+        ProjectResponse: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            description?: string | null;
+            /** @enum {string} */
+            kind: "ESTUDO" | "PESSOAL" | "TRABALHO";
+            /** @enum {string} */
+            status: "PLANEJADO" | "ATIVO" | "PAUSADO" | "CONCLUIDO";
+            /** Format: date */
+            startsOn?: string | null;
+            /** Format: date */
+            dueOn?: string | null;
+            url?: string | null;
+            /** Format: uuid */
+            goalId?: string | null;
+            goalTitle?: string | null;
+            /** Format: uuid */
+            courseId?: string | null;
+            courseName?: string | null;
+            /** Format: int32 */
+            openTasks: number;
+            /** Format: int32 */
+            doneTasks: number;
+            /** Format: int32 */
+            percent: number;
+            overdue: boolean;
+        };
+        MilestoneRequest: {
+            title: string;
+            /** Format: date */
+            dueOn?: string | null;
+        };
+        GoalResponse: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            description?: string | null;
+            /** @enum {string} */
+            area: "ESTUDOS" | "FINANCAS" | "SAUDE" | "CARREIRA" | "PESSOAL";
+            /** @enum {string} */
+            status: "ATIVA" | "CONCLUIDA" | "ABANDONADA";
+            /** Format: date */
+            startsOn?: string | null;
+            /** Format: date */
+            dueOn?: string | null;
+            /** Format: date */
+            completedOn?: string | null;
+            /** @enum {string} */
+            progressMode: "MANUAL" | "MARCOS" | "TAREFAS" | "FINANCEIRO";
+            targetValue?: number | null;
+            currentValue?: number | null;
+            unit?: string | null;
+            /** Format: uuid */
+            accountId?: string | null;
+            accountName?: string | null;
+            current: number;
+            target?: number | null;
+            /** Format: int32 */
+            percent: number;
+            /** Format: int32 */
+            expectedPercent?: number | null;
+            /** @enum {string} */
+            pace: "SEM_PRAZO" | "ADIANTADA" | "NO_RITMO" | "ATRASADA" | "CONCLUIDA" | "ABANDONADA";
+            milestones: components["schemas"]["MilestoneResponse"][];
+            /** Format: int32 */
+            openTasks: number;
+            /** Format: int32 */
+            doneTasks: number;
+        };
+        MilestoneResponse: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: date */
+            dueOn?: string | null;
+            /** Format: date */
+            doneOn?: string | null;
+            done: boolean;
+            /** Format: int32 */
+            position: number;
+        };
         MetricRequest: {
             name: string;
             unit: string;
@@ -1189,6 +1537,27 @@ export interface components {
             /** Format: int32 */
             rate30: number;
             lastDays: components["schemas"]["DayCell"][];
+        };
+        GoalRequest: {
+            title: string;
+            description?: string | null;
+            /** @enum {string|null} */
+            area?: "ESTUDOS" | "FINANCAS" | "SAUDE" | "CARREIRA" | "PESSOAL" | null;
+            /** Format: date */
+            startsOn?: string | null;
+            /** Format: date */
+            dueOn?: string | null;
+            /** @enum {string|null} */
+            progressMode?: "MANUAL" | "MARCOS" | "TAREFAS" | "FINANCEIRO" | null;
+            targetValue?: number | null;
+            currentValue?: number | null;
+            unit?: string | null;
+            /** Format: uuid */
+            accountId?: string | null;
+        };
+        StatusRequest: {
+            /** @enum {string} */
+            status: "ATIVA" | "CONCLUIDA" | "ABANDONADA";
         };
         EventRequest: {
             title: string;
@@ -1714,6 +2083,52 @@ export interface operations {
             };
         };
     };
+    updateTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TaskRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    deleteTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     updateResource: {
         parameters: {
             query?: never;
@@ -1803,6 +2218,100 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    updateProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProjectResponse"];
+                };
+            };
+        };
+    };
+    deleteProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateMilestone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MilestoneRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    deleteMilestone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
             };
         };
     };
@@ -1940,6 +2449,100 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["HabitResponse"];
+                };
+            };
+        };
+    };
+    goal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    updateGoal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    deleteGoal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    setGoalStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
                 };
             };
         };
@@ -2457,6 +3060,99 @@ export interface operations {
             };
         };
     };
+    tasks: {
+        parameters: {
+            query?: {
+                view?: "HOJE" | "SEMANA" | "ABERTAS" | "FEITAS";
+                goalId?: string;
+                projectId?: string;
+                courseId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"][];
+                };
+            };
+        };
+    };
+    createTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TaskRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    taskUndone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
+    taskDone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaskResponse"];
+                };
+            };
+        };
+    };
     sessions: {
         parameters: {
             query?: {
@@ -2636,6 +3332,94 @@ export interface operations {
             };
         };
     };
+    projects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProjectResponse"][];
+                };
+            };
+        };
+    };
+    createProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProjectResponse"];
+                };
+            };
+        };
+    };
+    milestoneUndone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    milestoneDone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
     metrics: {
         parameters: {
             query?: never;
@@ -2791,6 +3575,76 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["HabitResponse"];
+                };
+            };
+        };
+    };
+    goals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"][];
+                };
+            };
+        };
+    };
+    createGoal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    addMilestone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MilestoneRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
                 };
             };
         };

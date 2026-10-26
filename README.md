@@ -50,7 +50,7 @@ Para subir a API também em container: `docker compose --profile api up -d --bui
 backend/                     API Spring Boot
   src/main/java/com/vida/    um pacote por módulo (auth, academico, financas, saude, metas, hoje…)
   src/main/resources/
-    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico, V4 finanças, V5 saúde…)
+    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico, V4 finanças, V5 saúde, V6 metas)
 frontend/                    SPA React + Vite + TS
 docker-compose.yml           Postgres 18 (+ API no profile "api")
 ```
@@ -91,6 +91,13 @@ Erros da API seguem o formato `application/problem+json`; erros de validação t
 - **Gráficos:** métricas de soma aparecem em colunas por dia; média e último, em linha ligando os dias com registro (o que importa é a tendência). A meta aparece como linha de referência.
 - **Hábitos:** *todo dia*, *dias fixos* da semana ou *X vezes por semana* (qualquer dia). A sequência é calculada: hoje ainda não feito não quebra a sequência; dias fora da frequência são pulados; no "X por semana" a sequência conta semanas que bateram a meta. Também há recorde, progresso da semana e taxa dos últimos 30 dias.
 
+## Metas e planos: regras
+
+- **Progresso da meta**, sempre calculado, de um de quatro jeitos: *por marcos* (concluídos ÷ total), *por tarefas* (tarefas ligadas feitas ÷ total), *valor manual* (ex.: 6 de 12 livros) ou *saldo de uma conta* até o valor-alvo (ex.: juntar R$ 10 mil para a viagem).
+- **Ritmo:** com início e prazo, o esperado é a fração do tempo que já passou. A meta fica *adiantada*, *no ritmo* (até 10 pontos de diferença) ou *atrasada*; passado o prazo sem chegar a 100%, *atrasada*. Na barra, um traço marca onde você deveria estar hoje.
+- **Tarefas** formam uma lista só, com visões *Hoje* (vencidas e de hoje), *Próximos 7 dias*, *Todas abertas* e *Feitas*. Cada tarefa pode ser de uma meta, de um marco (aí conta para a meta dele), de um projeto e/ou de uma disciplina. Apagar meta, projeto ou disciplina não apaga as tarefas.
+- **Projetos** mostram o progresso pelas tarefas e avisam quando passam do prazo.
+
 ## Roadmap
 
 0. ~~Esqueleto do projeto~~
@@ -98,7 +105,7 @@ Erros da API seguem o formato `application/problem+json`; erros de validação t
 2. ~~Acadêmico — semestres, disciplinas, horário, avaliações, faltas, assuntos, cursos, sessões de estudo~~
 3. ~~Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento~~
 4. ~~Saúde e hábitos — métricas, medições, hábitos com sequência~~
-5. Metas e planos — metas, marcos, projetos, tarefas
+5. ~~Metas e planos — metas, marcos, projetos, tarefas~~
 6. Hoje — visão agregada do dia
 
 Depois da v1: controle de remédios, lembretes, importação de extrato, PWA.

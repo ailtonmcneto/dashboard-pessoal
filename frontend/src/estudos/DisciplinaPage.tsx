@@ -6,6 +6,7 @@ import type { Assessment, AssessmentKind, Course, CourseStatus } from '../api/ty
 import { StatusBadge } from '../components/StatusBadge'
 import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle, Select } from '../components/ui'
 import { formData } from '../lib/forms'
+import { TaskList } from '../metas/TaskList'
 import { formatClock, formatDate, formatGrade, todayIso, WEEKDAYS } from '../lib/format'
 import {
   useAddAbsence,
@@ -134,7 +135,7 @@ function AssessmentsSection({ course }: { course: Course }) {
           <div className="sm:col-span-6">
             <ErrorText error={Object.keys(errors).length ? null : add.error} />
             <Button type="submit" disabled={add.isPending}>
-              Adicionar
+              Adicionar avaliação
             </Button>
           </div>
         </form>
@@ -369,6 +370,10 @@ export function DisciplinaPage() {
           <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
             <div className="space-y-6">
               <AssessmentsSection course={c} />
+              <Card>
+                <SectionTitle>Tarefas</SectionTitle>
+                <TaskList filter={{ courseId: c.id }} showLinks={false} empty="Nenhuma tarefa da disciplina." />
+              </Card>
               <TopicsSection courseId={c.id} />
             </div>
             <div className="space-y-6">

@@ -11,6 +11,7 @@ import { ASSESSMENT_KIND } from '../estudos/labels'
 import { ColorDot } from '../estudos/parts'
 import { useMonthSummary } from '../financas/api'
 import { currentMonth, formatClock, formatDate, formatMoney, todayIso } from '../lib/format'
+import { TaskList } from '../metas/TaskList'
 import { useHabits, useMetrics } from '../saude/api'
 import { DayToggle } from '../saude/HabitToggle'
 import { formatValue, statusFor } from '../saude/labels'
@@ -90,6 +91,15 @@ function UpcomingAssessments() {
           )
         }
       </Loaded>
+    </Card>
+  )
+}
+
+function TasksToday() {
+  return (
+    <Card>
+      <SectionTitle action={<MoreLink to="/metas">Tarefas</MoreLink>}>Tarefas de hoje</SectionTitle>
+      <TaskList view="HOJE" empty="Nada vencendo hoje." />
     </Card>
   )
 }
@@ -229,6 +239,7 @@ export function HojePage() {
     <>
       <PageHeader title={`${greeting(now.getHours())}, ${firstName}`} subtitle={todayFmt.format(now)} />
       <div className="grid gap-6 lg:grid-cols-2">
+        <TasksToday />
         <ClassesToday weekday={weekday} />
         <UpcomingAssessments />
         <Card>
