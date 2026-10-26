@@ -1,9 +1,18 @@
 import { MapPin, Trash2 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import type { EventItem } from '../api/types'
 import { dayKey, formatDay, formatTime } from '../lib/format'
 import { KIND_LABEL } from './events'
 
-export function EventList({ events, onDelete }: { events: EventItem[]; onDelete?: (id: string) => void }) {
+export function EventList({
+  events,
+  onDelete,
+  edit,
+}: {
+  events: EventItem[]
+  onDelete?: (id: string) => void
+  edit?: (event: EventItem) => ReactNode
+}) {
   if (events.length === 0) return <p className="text-sm text-muted">Nada marcado.</p>
 
   const byDay = new Map<string, EventItem[]>()
@@ -37,6 +46,7 @@ export function EventList({ events, onDelete }: { events: EventItem[]; onDelete?
                     )}
                   </p>
                 </div>
+                {edit?.(e)}
                 {onDelete && (
                   <button
                     onClick={() => onDelete(e.id)}

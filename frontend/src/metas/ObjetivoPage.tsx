@@ -1,14 +1,25 @@
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import type { Goal, GoalStatus } from '../api/types'
+import type { Goal, GoalStatus, Milestone } from '../api/types'
+import { EditButton } from '../components/Modal'
 import { StatusBadge } from '../components/StatusBadge'
-import { Button, Card, Empty, ErrorText, IconButton, Input, Loaded, SectionTitle } from '../components/ui'
+import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle } from '../components/ui'
 import { formData } from '../lib/forms'
 import { formatDate } from '../lib/format'
-import { useAddMilestone, useDeleteGoal, useDeleteMilestone, useGoal, useGoalStatus, useToggleMilestone, useUpdateGoal } from './api'
+import {
+  useAddMilestone,
+  useDeleteGoal,
+  useDeleteMilestone,
+  useGoal,
+  useGoalStatus,
+  useToggleMilestone,
+  useUpdateGoal,
+  useUpdateMilestone,
+} from './api'
 import { GoalBar } from './GoalCard'
 import { AREA, PACE, PROGRESS_MODE, progressText } from './labels'
+import { GoalForm } from './ObjetivosPage'
 import { TaskList } from './TaskList'
 
 /** Caixa do marco que marca na hora (otimista) e volta se a API falhar. */
@@ -30,6 +41,29 @@ function MilestoneCheck({ id, title, done }: { id: string; title: string; done: 
   )
 }
 
+function MilestoneForm({ milestone, onDone }: { milestone: Milestone; onDone: () => void }) {
+  const update = useUpdateMilestone()
+  function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const f = formData(e.currentTarget)
+    update.mutate({ id: milestone.id, title: f.required('title'), dueOn: f.text('dueOn') }, { onSuccess: onDone })
+  }
+  return (
+    <form onSubmit={submit} className="space-y-3">
+      <Field label="Marco">
+        <Input name="title" required maxLength={120} defaultValue={milestone.title} />
+      </Field>
+      <Field label="Prazo">
+        <Input name="dueOn" type="date" defaultValue={milestone.dueOn ?? ''} />
+      </Field>
+      <ErrorText error={update.error} />
+      <Button type="submit" disabled={update.isPending}>
+        Salvar
+      </Button>
+    </form>
+  )
+}
+
 function Milestones({ goal }: { goal: Goal }) {
   const add = useAddMilestone(goal.id)
   const remove = useDeleteMilestone()
@@ -43,7 +77,9 @@ function Milestones({ goal }: { goal: Goal }) {
     <Card>
       <SectionTitle>Marcos</SectionTitle>
       {goal.progressMode !== 'MARCOS' && (
-        <p className="mb-2 text-xs text-muted">Esta meta mede o progresso de outro jeito; os marcos servem de roteiro.</p>
+        <p className="mb-2 text-xs text-muted">
+          Esta meta mede o progresso de outro jeito; os marcos servem de roteiro.
+        </p>
       )}
       {goal.milestones.length === 0 ? (
         <Empty>Nenhum marco ainda.</Empty>
@@ -57,6 +93,9 @@ function Milestones({ goal }: { goal: Goal }) {
               <span className="text-xs text-muted">
                 {m.done ? `feito ${formatDate(m.doneOn!)}` : m.dueOn ? `até ${formatDate(m.dueOn)}` : ''}
               </span>
+              <EditButton label={`Editar marco ${m.title}`} title="Editar marco">
+                {(close) => <MilestoneForm milestone={m} onDone={close} />}
+              </EditButton>
               <IconButton label={`Apagar marco ${m.title}`} onClick={() => remove.mutate(m.id)}>
                 <Trash2 size={14} />
               </IconButton>
@@ -160,6 +199,9 @@ export function ObjetivoPage() {
                     Reabrir
                   </Button>
                 )}
+                <EditButton label="Editar meta" title="Editar meta">
+                  {(close) => <GoalForm initial={g} onDone={close} />}
+                </EditButton>
                 <IconButton
                   label="Apagar meta"
                   onClick={() =>

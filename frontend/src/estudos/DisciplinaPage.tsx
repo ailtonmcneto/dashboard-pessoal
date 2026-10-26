@@ -3,8 +3,20 @@ import { type FormEvent, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '../api/client'
 import type { Assessment, AssessmentKind, Course, CourseStatus } from '../api/types'
+import { EditButton } from '../components/Modal'
 import { StatusBadge } from '../components/StatusBadge'
-import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle, Select } from '../components/ui'
+import {
+  Button,
+  Card,
+  Empty,
+  ErrorText,
+  Field,
+  IconButton,
+  Input,
+  Loaded,
+  SectionTitle,
+  Select,
+} from '../components/ui'
 import { formData } from '../lib/forms'
 import { TaskList } from '../metas/TaskList'
 import { formatClock, formatDate, formatGrade, todayIso, WEEKDAYS } from '../lib/format'
@@ -20,12 +32,14 @@ import {
   useDeleteAssessment,
   useDeleteCourse,
   useDeleteSlot,
+  useTopics,
   useUpdateAssessment,
   useUpdateCourse,
 } from './api'
 import { ASSESSMENT_KIND, COURSE_STATUS, GRADE_STATUS } from './labels'
 import { neededText } from './grades'
 import { AbsenceMeter, ColorDot } from './parts'
+import { CourseForm } from './SemestrePage'
 import { TopicsSection } from './TopicsSection'
 
 function fieldErrors(error: unknown) {
@@ -73,28 +87,109 @@ function ScoreInput({ assessment }: { assessment: Assessment }) {
   )
 }
 
-function AssessmentsSection({ course }: { course: Course }) {
-  const list = useCourseAssessments(course.id)
-  const add = useAddAssessment(course.id)
-  const remove = useDeleteAssessment()
-  const errors = fieldErrors(add.error)
-  const [open, setOpen] = useState(false)
+/** Cria uma avaliação ou, com `initial`, edita essa avaliação (a nota continua sendo lançada na lista). */
+function AssessmentForm({
+  courseId,
+  initial,
+  onDone,
+}: {
+  courseId: string
+  initial?: Assessment
+  onDone?: () => void
+}) {
+  const add = useAddAssessment(courseId)
+  const update = useUpdateAssessment()
+  const save = initial ? update : add
+  const topics = useTopics({ courseId })
+  const errors = fieldErrors(save.error)
+  const [topicIds, setTopicIds] = useState<string[]>(initial?.topicIds ?? [])
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
-    add.mutate(
-      {
-        title: f.required('title'),
-        kind: f.text('kind') as AssessmentKind,
-        dueOn: f.text('dueOn'),
-        weight: f.number('weight'),
-        maxScore: f.number('maxScore'),
-      },
-      { onSuccess: () => form.reset() },
-    )
+    const req = {
+      title: f.required('title'),
+      kind: f.text('kind') as AssessmentKind,
+      dueOn: f.text('dueOn'),
+      weight: f.number('weight'),
+      maxScore: f.number('maxScore'),
+      topicIds,
+    }
+    if (initial) update.mutate({ id: initial.id, ...req, score: initial.score }, { onSuccess: onDone })
+    else
+      add.mutate(req, {
+        onSuccess: () => {
+          form.reset()
+          setTopicIds([])
+        },
+      })
   }
+
+  const toggle = (id: string, on: boolean) => setTopicIds((ids) => (on ? [...ids, id] : ids.filter((x) => x !== id)))
+
+  return (
+    <form
+      onSubmit={submit}
+      className={`grid gap-3 sm:items-end ${initial ? 'sm:grid-cols-2' : 'mb-4 rounded-lg bg-canvas p-3 sm:grid-cols-6'}`}
+    >
+      <div className="sm:col-span-2">
+        <Field label="Título" error={errors.title}>
+          <Input name="title" required maxLength={120} placeholder="P1" defaultValue={initial?.title} />
+        </Field>
+      </div>
+      <Field label="Tipo">
+        <Select name="kind" defaultValue={initial?.kind ?? 'PROVA'}>
+          {Object.entries(ASSESSMENT_KIND).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field label="Data" error={errors.dueOn}>
+        <Input name="dueOn" type="date" defaultValue={initial?.dueOn ?? ''} />
+      </Field>
+      <Field label="Peso" error={errors.weight}>
+        <Input name="weight" type="number" step="0.1" min="0.1" defaultValue={initial?.weight ?? 1} />
+      </Field>
+      <Field label="Nota máx." error={errors.maxScore}>
+        <Input name="maxScore" type="number" step="0.1" min="0.1" defaultValue={initial?.maxScore ?? 10} />
+      </Field>
+      {(topics.data?.length ?? 0) > 0 && (
+        <fieldset className="sm:col-span-full">
+          <legend className="mb-1 text-sm font-medium">Assuntos que caem</legend>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {topics.data!.map((t) => (
+              <label key={t.id} className="flex items-center gap-1.5 text-sm">
+                <input
+                  type="checkbox"
+                  checked={topicIds.includes(t.id)}
+                  onChange={(e) => toggle(t.id, e.target.checked)}
+                  className="accent-accent"
+                />
+                {t.title}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      <div className="sm:col-span-full">
+        <ErrorText error={Object.keys(errors).length ? null : save.error} />
+        <Button type="submit" disabled={save.isPending}>
+          {initial ? 'Salvar' : 'Adicionar avaliação'}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+function AssessmentsSection({ course }: { course: Course }) {
+  const list = useCourseAssessments(course.id)
+  const topics = useTopics({ courseId: course.id })
+  const remove = useDeleteAssessment()
+  const [open, setOpen] = useState(false)
+  const topicTitle = new Map((topics.data ?? []).map((t) => [t.id, t.title]))
 
   return (
     <Card>
@@ -107,39 +202,7 @@ function AssessmentsSection({ course }: { course: Course }) {
       >
         Avaliações
       </SectionTitle>
-      {open && (
-        <form onSubmit={submit} className="mb-4 grid gap-3 rounded-lg bg-canvas p-3 sm:grid-cols-6 sm:items-end">
-          <div className="sm:col-span-2">
-            <Field label="Título" error={errors.title}>
-              <Input name="title" required maxLength={120} placeholder="P1" />
-            </Field>
-          </div>
-          <Field label="Tipo">
-            <Select name="kind" defaultValue="PROVA">
-              {Object.entries(ASSESSMENT_KIND).map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Data" error={errors.dueOn}>
-            <Input name="dueOn" type="date" />
-          </Field>
-          <Field label="Peso" error={errors.weight}>
-            <Input name="weight" type="number" step="0.1" min="0.1" defaultValue="1" />
-          </Field>
-          <Field label="Nota máx." error={errors.maxScore}>
-            <Input name="maxScore" type="number" step="0.1" min="0.1" defaultValue="10" />
-          </Field>
-          <div className="sm:col-span-6">
-            <ErrorText error={Object.keys(errors).length ? null : add.error} />
-            <Button type="submit" disabled={add.isPending}>
-              Adicionar avaliação
-            </Button>
-          </div>
-        </form>
-      )}
+      {open && <AssessmentForm courseId={course.id} />}
       <Loaded query={list}>
         {(data) =>
           data.length === 0 ? (
@@ -154,8 +217,20 @@ function AssessmentsSection({ course }: { course: Course }) {
                       {ASSESSMENT_KIND[a.kind]} · peso {a.weight}
                       {a.dueOn && ` · ${formatDate(a.dueOn)}`}
                     </p>
+                    {a.topicIds.length > 0 && (
+                      <p className="truncate text-xs text-muted">
+                        Assuntos:{' '}
+                        {a.topicIds
+                          .map((id) => topicTitle.get(id))
+                          .filter(Boolean)
+                          .join(', ')}
+                      </p>
+                    )}
                   </div>
                   <ScoreInput key={`${a.id}-${a.score}`} assessment={a} />
+                  <EditButton label={`Editar ${a.title}`} title="Editar avaliação">
+                    {(close) => <AssessmentForm courseId={course.id} initial={a} onDone={close} />}
+                  </EditButton>
                   <IconButton label={`Excluir ${a.title}`} onClick={() => remove.mutate(a.id)}>
                     <Trash2 size={15} />
                   </IconButton>
@@ -249,7 +324,10 @@ function AbsencesSection({ course }: { course: Course }) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
-    add.mutate({ date: f.required('date'), classesMissed: f.number('classesMissed') }, { onSuccess: () => form.reset() })
+    add.mutate(
+      { date: f.required('date'), classesMissed: f.number('classesMissed') },
+      { onSuccess: () => form.reset() },
+    )
   }
 
   return (
@@ -354,6 +432,9 @@ export function DisciplinaPage() {
                   ))}
                 </Select>
               </div>
+              <EditButton label="Editar disciplina" title="Editar disciplina">
+                {(close) => <CourseForm termId={c.termId} initial={c} onDone={close} />}
+              </EditButton>
               <IconButton
                 label="Apagar disciplina"
                 onClick={() => {

@@ -33,6 +33,18 @@ export function useCreateEvent() {
   })
 }
 
+export function useUpdateEvent() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, ...req }: EventRequest & { id: string }) => api<EventItem>(`/events/${id}`, 'PUT', req),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ['events'], refetchType: 'all' }),
+        qc.invalidateQueries({ queryKey: ['api', 'hoje'], refetchType: 'all' }),
+      ]),
+  })
+}
+
 export function useDeleteEvent() {
   const qc = useQueryClient()
   return useMutation({

@@ -3,8 +3,20 @@ import { type FormEvent, useState } from 'react'
 import { ApiError } from '../api/client'
 import type { Account, AccountKind, Card as CardT } from '../api/types'
 import { Meter } from '../components/charts'
+import { EditButton } from '../components/Modal'
 import { StatusBadge } from '../components/StatusBadge'
-import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle, Select } from '../components/ui'
+import {
+  Button,
+  Card,
+  Empty,
+  ErrorText,
+  Field,
+  IconButton,
+  Input,
+  Loaded,
+  SectionTitle,
+  Select,
+} from '../components/ui'
 import { formData } from '../lib/forms'
 import { formatDate, formatMoney, todayIso } from '../lib/format'
 import {
@@ -45,6 +57,9 @@ function AccountRow({ a }: { a: Account }) {
           <p className="text-xs tabular-nums text-muted">previsto {formatMoney(a.projectedBalance)}</p>
         )}
       </div>
+      <EditButton label={`Editar ${a.name}`} title="Editar conta">
+        {(close) => <AccountForm initial={a} onDone={close} />}
+      </EditButton>
       <IconButton label={a.archived ? `Desarquivar ${a.name}` : `Arquivar ${a.name}`} onClick={toggleArchive}>
         {a.archived ? <ArchiveRestore size={15} /> : <Archive size={15} />}
       </IconButton>
@@ -54,32 +69,43 @@ function AccountRow({ a }: { a: Account }) {
       >
         <Trash2 size={15} />
       </IconButton>
-      {(remove.error || update.error) && (
-        <ErrorText error={remove.error ?? update.error} />
-      )}
+      {(remove.error || update.error) && <ErrorText error={remove.error ?? update.error} />}
     </li>
   )
 }
 
-function NewAccountForm() {
+/** Cria uma conta ou, com `initial`, edita essa conta. */
+function AccountForm({ initial, onDone }: { initial?: Account; onDone?: () => void }) {
   const create = useCreateAccount()
-  const errors = create.error instanceof ApiError ? create.error.errors : {}
+  const update = useUpdateAccount()
+  const save = initial ? update : create
+  const errors = save.error instanceof ApiError ? save.error.errors : {}
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
-    create.mutate(
-      { name: f.required('name'), kind: f.text('kind') as AccountKind, openingBalance: f.number('openingBalance') },
-      { onSuccess: () => form.reset() },
-    )
+    const req = {
+      name: f.required('name'),
+      kind: f.text('kind') as AccountKind,
+      openingBalance: f.number('openingBalance'),
+    }
+    if (initial) update.mutate({ id: initial.id, ...req, archived: initial.archived }, { onSuccess: onDone })
+    else create.mutate(req, { onSuccess: () => form.reset() })
   }
   return (
-    <form onSubmit={submit} className="mt-4 grid gap-3 border-t border-line pt-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-end">
-      <Field label="Nova conta" error={errors.name}>
-        <Input name="name" placeholder="Ex.: Nubank, Carteira" required maxLength={60} />
+    <form
+      onSubmit={submit}
+      className={
+        initial
+          ? 'grid gap-3 sm:grid-cols-2 sm:items-end'
+          : 'mt-4 grid gap-3 border-t border-line pt-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-end'
+      }
+    >
+      <Field label={initial ? 'Nome' : 'Nova conta'} error={errors.name}>
+        <Input name="name" placeholder="Ex.: Nubank, Carteira" required maxLength={60} defaultValue={initial?.name} />
       </Field>
       <Field label="Tipo">
-        <Select name="kind" defaultValue="CORRENTE">
+        <Select name="kind" defaultValue={initial?.kind ?? 'CORRENTE'}>
           {Object.entries(ACCOUNT_KIND).map(([v, l]) => (
             <option key={v} value={v}>
               {l}
@@ -88,13 +114,25 @@ function NewAccountForm() {
         </Select>
       </Field>
       <Field label="Saldo inicial" error={errors.openingBalance}>
-        <Input name="openingBalance" type="number" step="0.01" placeholder="0,00" />
+        <Input
+          name="openingBalance"
+          type="number"
+          step="0.01"
+          placeholder="0,00"
+          defaultValue={initial?.openingBalance ?? ''}
+        />
       </Field>
-      <Button type="submit" disabled={create.isPending}>
-        <Plus size={16} /> Conta
+      <Button type="submit" disabled={save.isPending}>
+        {initial ? (
+          'Salvar'
+        ) : (
+          <>
+            <Plus size={16} /> Conta
+          </>
+        )}
       </Button>
-      <div className="sm:col-span-4">
-        <ErrorText error={Object.keys(errors).length ? null : create.error} />
+      <div className="sm:col-span-full">
+        <ErrorText error={Object.keys(errors).length ? null : save.error} />
       </div>
     </form>
   )
@@ -220,6 +258,9 @@ function CardRow({ card, accounts }: { card: CardT; accounts: Account[] }) {
         <Button variant="ghost" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           {open ? 'Fechar' : 'Faturas'}
         </Button>
+        <EditButton label={`Editar ${card.name}`} title="Editar cartão">
+          {(close) => <CardForm accounts={accounts.filter((a) => !a.archived)} initial={card} onDone={close} />}
+        </EditButton>
         <IconButton
           label={card.archived ? `Desarquivar ${card.name}` : `Arquivar ${card.name}`}
           onClick={() =>
@@ -236,7 +277,10 @@ function CardRow({ card, accounts }: { card: CardT; accounts: Account[] }) {
         >
           {card.archived ? <ArchiveRestore size={15} /> : <Archive size={15} />}
         </IconButton>
-        <IconButton label={`Apagar ${card.name}`} onClick={() => confirm(`Apagar o cartão ${card.name}?`) && remove.mutate(card.id)}>
+        <IconButton
+          label={`Apagar ${card.name}`}
+          onClick={() => confirm(`Apagar o cartão ${card.name}?`) && remove.mutate(card.id)}
+        >
           <Trash2 size={15} />
         </IconButton>
       </div>
@@ -244,7 +288,8 @@ function CardRow({ card, accounts }: { card: CardT; accounts: Account[] }) {
         <div className="mt-2 space-y-1">
           <Meter value={card.used} max={card.creditLimit} label={`Limite usado do ${card.name}`} />
           <p className="text-xs tabular-nums text-muted">
-            {formatMoney(card.used)} usados · {formatMoney(card.available ?? 0)} disponíveis de {formatMoney(card.creditLimit)}
+            {formatMoney(card.used)} usados · {formatMoney(card.available ?? 0)} disponíveis de{' '}
+            {formatMoney(card.creditLimit)}
           </p>
         </div>
       )}
@@ -254,42 +299,51 @@ function CardRow({ card, accounts }: { card: CardT; accounts: Account[] }) {
   )
 }
 
-function NewCardForm({ accounts }: { accounts: Account[] }) {
+/** Cria um cartão ou, com `initial`, edita esse cartão. */
+function CardForm({ accounts, initial, onDone }: { accounts: Account[]; initial?: CardT; onDone?: () => void }) {
   const create = useCreateCard()
-  const errors = create.error instanceof ApiError ? create.error.errors : {}
+  const update = useUpdateCard()
+  const save = initial ? update : create
+  const errors = save.error instanceof ApiError ? save.error.errors : {}
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
-    create.mutate(
-      {
-        name: f.required('name'),
-        creditLimit: f.number('creditLimit'),
-        closingDay: f.number('closingDay') ?? 1,
-        dueDay: f.number('dueDay') ?? 1,
-        paymentAccountId: f.text('paymentAccountId'),
-      },
-      { onSuccess: () => form.reset() },
-    )
+    const req = {
+      name: f.required('name'),
+      creditLimit: f.number('creditLimit'),
+      closingDay: f.number('closingDay') ?? 1,
+      dueDay: f.number('dueDay') ?? 1,
+      paymentAccountId: f.text('paymentAccountId'),
+    }
+    if (initial) update.mutate({ id: initial.id, ...req, archived: initial.archived }, { onSuccess: onDone })
+    else create.mutate(req, { onSuccess: () => form.reset() })
   }
   return (
-    <form onSubmit={submit} className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 sm:grid-cols-6 sm:items-end">
+    <form
+      onSubmit={submit}
+      className={
+        initial
+          ? 'grid grid-cols-2 gap-3 sm:items-end'
+          : 'mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 sm:grid-cols-6 sm:items-end'
+      }
+    >
       <div className="col-span-2">
-        <Field label="Novo cartão" error={errors.name}>
-          <Input name="name" required maxLength={60} placeholder="Ex.: Nubank" />
+        <Field label={initial ? 'Nome' : 'Novo cartão'} error={errors.name}>
+          <Input name="name" required maxLength={60} placeholder="Ex.: Nubank" defaultValue={initial?.name} />
         </Field>
       </div>
       <Field label="Limite" error={errors.creditLimit}>
-        <Input name="creditLimit" type="number" step="0.01" min="0.01" />
+        <Input name="creditLimit" type="number" step="0.01" min="0.01" defaultValue={initial?.creditLimit ?? ''} />
       </Field>
       <Field label="Fecha dia" error={errors.closingDay}>
-        <Input name="closingDay" type="number" min="1" max="28" required />
+        <Input name="closingDay" type="number" min="1" max="28" required defaultValue={initial?.closingDay} />
       </Field>
       <Field label="Vence dia" error={errors.dueDay}>
-        <Input name="dueDay" type="number" min="1" max="28" required />
+        <Input name="dueDay" type="number" min="1" max="28" required defaultValue={initial?.dueDay} />
       </Field>
       <Field label="Paga com">
-        <Select name="paymentAccountId" defaultValue="">
+        <Select name="paymentAccountId" defaultValue={initial?.paymentAccountId ?? ''}>
           <option value="">—</option>
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>
@@ -298,10 +352,16 @@ function NewCardForm({ accounts }: { accounts: Account[] }) {
           ))}
         </Select>
       </Field>
-      <div className="col-span-2 sm:col-span-6">
-        <ErrorText error={Object.keys(errors).length ? null : create.error} />
-        <Button type="submit" disabled={create.isPending}>
-          <Plus size={16} /> Cartão
+      <div className="col-span-full">
+        <ErrorText error={Object.keys(errors).length ? null : save.error} />
+        <Button type="submit" disabled={save.isPending}>
+          {initial ? (
+            'Salvar'
+          ) : (
+            <>
+              <Plus size={16} /> Cartão
+            </>
+          )}
         </Button>
       </div>
     </form>
@@ -328,7 +388,7 @@ export function ContasPage() {
             )
           }
         </Loaded>
-        <NewAccountForm />
+        <AccountForm />
       </Card>
       <Card>
         <SectionTitle>Cartões de crédito</SectionTitle>
@@ -348,7 +408,7 @@ export function ContasPage() {
             )
           }
         </Loaded>
-        <NewCardForm accounts={(accounts.data ?? []).filter((a) => !a.archived)} />
+        <CardForm accounts={(accounts.data ?? []).filter((a) => !a.archived)} />
       </Card>
     </div>
   )

@@ -1,8 +1,20 @@
 import { Pause, Play, Trash2 } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { ApiError } from '../api/client'
-import type { Frequency } from '../api/types'
-import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle, Select } from '../components/ui'
+import type { Frequency, Recurrence } from '../api/types'
+import { EditButton } from '../components/Modal'
+import {
+  Button,
+  Card,
+  Empty,
+  ErrorText,
+  Field,
+  IconButton,
+  Input,
+  Loaded,
+  SectionTitle,
+  Select,
+} from '../components/ui'
 import { formData } from '../lib/forms'
 import { formatDate, formatMoney, todayIso } from '../lib/format'
 import {
@@ -13,64 +25,75 @@ import {
   useDeleteRecurrence,
   useRecurrences,
   useToggleRecurrence,
+  useUpdateRecurrence,
 } from './api'
 import { categoryLabel, categoryOptions, FREQUENCY } from './labels'
 import { makeLookup } from './lookup'
 
-function RecurrenceForm() {
+/** Cria uma recorrência ou, com `initial`, edita esse molde (o tipo não muda; vale para os próximos lançamentos). */
+function RecurrenceForm({ initial, onDone }: { initial?: Recurrence; onDone?: () => void }) {
   const create = useCreateRecurrence()
+  const update = useUpdateRecurrence()
+  const save = initial ? update : create
   const accounts = (useAccounts().data ?? []).filter((a) => !a.archived)
   const cards = (useCards().data ?? []).filter((c) => !c.archived)
   const categories = useCategories().data ?? []
-  const [kind, setKind] = useState<'DESPESA' | 'RECEITA'>('DESPESA')
-  const errors = create.error instanceof ApiError ? create.error.errors : {}
+  const [kind, setKind] = useState<'DESPESA' | 'RECEITA'>(initial?.kind === 'RECEITA' ? 'RECEITA' : 'DESPESA')
+  const errors = save.error instanceof ApiError ? save.error.errors : {}
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
     const [type, id] = (f.text('source') ?? ':').split(':')
-    create.mutate(
-      {
-        description: f.required('description'),
-        amount: f.number('amount') ?? 0,
-        kind,
-        categoryId: f.text('categoryId'),
-        accountId: type === 'a' ? id : null,
-        cardId: type === 'c' ? id : null,
-        frequency: f.text('frequency') as Frequency,
-        startsOn: f.required('startsOn'),
-        endsOn: f.text('endsOn'),
-      },
-      { onSuccess: () => form.reset() },
-    )
+    const req = {
+      description: f.required('description'),
+      amount: f.number('amount') ?? 0,
+      kind,
+      categoryId: f.text('categoryId'),
+      accountId: type === 'a' ? id : null,
+      cardId: type === 'c' ? id : null,
+      frequency: f.text('frequency') as Frequency,
+      startsOn: f.required('startsOn'),
+      endsOn: f.text('endsOn'),
+    }
+    if (initial) update.mutate({ id: initial.id, ...req }, { onSuccess: onDone })
+    else create.mutate(req, { onSuccess: () => form.reset() })
   }
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <div role="radiogroup" aria-label="Tipo" className="grid grid-cols-2 gap-1 rounded-lg bg-canvas p-1">
-        {(['DESPESA', 'RECEITA'] as const).map((k) => (
-          <button
-            key={k}
-            type="button"
-            role="radio"
-            aria-checked={kind === k}
-            onClick={() => setKind(k)}
-            className={`rounded-md px-2 py-1.5 text-sm font-medium ${kind === k ? 'bg-surface shadow-sm' : 'text-muted'}`}
-          >
-            {k === 'DESPESA' ? 'Despesa' : 'Receita'}
-          </button>
-        ))}
-      </div>
+      {!initial && (
+        <div role="radiogroup" aria-label="Tipo" className="grid grid-cols-2 gap-1 rounded-lg bg-canvas p-1">
+          {(['DESPESA', 'RECEITA'] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              role="radio"
+              aria-checked={kind === k}
+              onClick={() => setKind(k)}
+              className={`rounded-md px-2 py-1.5 text-sm font-medium ${kind === k ? 'bg-surface shadow-sm' : 'text-muted'}`}
+            >
+              {k === 'DESPESA' ? 'Despesa' : 'Receita'}
+            </button>
+          ))}
+        </div>
+      )}
       <Field label="Descrição" error={errors.description}>
-        <Input name="description" required maxLength={120} placeholder={kind === 'DESPESA' ? 'Aluguel' : 'Salário'} />
+        <Input
+          name="description"
+          required
+          maxLength={120}
+          placeholder={kind === 'DESPESA' ? 'Aluguel' : 'Salário'}
+          defaultValue={initial?.description}
+        />
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Valor (R$)" error={errors.amount}>
-          <Input name="amount" type="number" step="0.01" min="0.01" required />
+          <Input name="amount" type="number" step="0.01" min="0.01" required defaultValue={initial?.amount} />
         </Field>
         <Field label="Frequência">
-          <Select name="frequency" defaultValue="MENSAL">
+          <Select name="frequency" defaultValue={initial?.frequency ?? 'MENSAL'}>
             {Object.entries(FREQUENCY).map(([v, l]) => (
               <option key={v} value={v}>
                 {l}
@@ -79,14 +102,18 @@ function RecurrenceForm() {
           </Select>
         </Field>
         <Field label="Primeira vez" error={errors.startsOn}>
-          <Input name="startsOn" type="date" defaultValue={todayIso()} required />
+          <Input name="startsOn" type="date" defaultValue={initial?.startsOn ?? todayIso()} required />
         </Field>
         <Field label="Até (opcional)" error={errors.endsOn}>
-          <Input name="endsOn" type="date" />
+          <Input name="endsOn" type="date" defaultValue={initial?.endsOn ?? ''} />
         </Field>
       </div>
       <Field label={kind === 'DESPESA' ? 'Pago com' : 'Entra em'}>
-        <Select name="source" required defaultValue="">
+        <Select
+          name="source"
+          required
+          defaultValue={initial?.cardId ? `c:${initial.cardId}` : initial?.accountId ? `a:${initial.accountId}` : ''}
+        >
           <option value="" disabled>
             Escolha…
           </option>
@@ -104,7 +131,7 @@ function RecurrenceForm() {
         </Select>
       </Field>
       <Field label="Categoria">
-        <Select name="categoryId" defaultValue="">
+        <Select name="categoryId" defaultValue={initial?.categoryId ?? ''}>
           <option value="">Sem categoria</option>
           {categoryOptions(categories, kind).map((c) => (
             <option key={c.id} value={c.id}>
@@ -114,12 +141,14 @@ function RecurrenceForm() {
         </Select>
       </Field>
       <p className="text-xs text-muted">
-        Se a primeira vez for no passado, os lançamentos até hoje são criados na hora. Em conta, eles nascem como
-        pendentes para você confirmar.
+        {initial
+          ? 'As mudanças valem para os próximos lançamentos; os já criados continuam como estão.'
+          : 'Se a primeira vez for no passado, os lançamentos até hoje são criados na hora. ' +
+            'Em conta, eles nascem como pendentes para você confirmar.'}
       </p>
-      <ErrorText error={Object.keys(errors).length ? null : create.error} />
-      <Button type="submit" disabled={create.isPending}>
-        Criar recorrência
+      <ErrorText error={Object.keys(errors).length ? null : save.error} />
+      <Button type="submit" disabled={save.isPending}>
+        {initial ? 'Salvar' : 'Criar recorrência'}
       </Button>
     </form>
   )
@@ -160,6 +189,9 @@ export function RecorrenciasPage() {
                       {r.kind === 'RECEITA' ? '+ ' : '− '}
                       {formatMoney(r.amount)}
                     </span>
+                    <EditButton label={`Editar ${r.description}`} title="Editar recorrência">
+                      {(close) => <RecurrenceForm initial={r} onDone={close} />}
+                    </EditButton>
                     <IconButton
                       label={r.active ? `Pausar ${r.description}` : `Retomar ${r.description}`}
                       onClick={() => toggle.mutate({ id: r.id, active: !r.active })}

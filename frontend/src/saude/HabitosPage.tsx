@@ -2,6 +2,7 @@ import { Archive, ArchiveRestore, CalendarDays, Flame, Trash2 } from 'lucide-rea
 import { type FormEvent, useState } from 'react'
 import { ApiError } from '../api/client'
 import type { Habit, HabitSchedule } from '../api/types'
+import { EditButton } from '../components/Modal'
 import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle } from '../components/ui'
 import { COURSE_COLORS } from '../estudos/labels'
 import { formData } from '../lib/forms'
@@ -23,7 +24,11 @@ function Heatmap({ habit }: { habit: Habit }) {
 
   return (
     <div className="mt-3 overflow-x-auto">
-      <div className="inline-grid grid-flow-col grid-rows-7 gap-0.5" role="img" aria-label={`${habit.name}: ${done.size} dias cumpridos nas últimas 12 semanas`}>
+      <div
+        className="inline-grid grid-flow-col grid-rows-7 gap-0.5"
+        role="img"
+        aria-label={`${habit.name}: ${done.size} dias cumpridos nas últimas 12 semanas`}
+      >
         {Array.from({ length: 12 * 7 }, (_, i) => {
           const date = addDaysIso(firstMonday, i)
           const future = date > today
@@ -48,7 +53,14 @@ function HabitRow({ habit }: { habit: Habit }) {
   const [open, setOpen] = useState(false)
   const update = useUpdateHabit()
   const remove = useDeleteHabit()
-  const unit = habit.streakUnit === 'SEMANAS' ? (habit.currentStreak === 1 ? 'semana' : 'semanas') : habit.currentStreak === 1 ? 'dia' : 'dias'
+  const unit =
+    habit.streakUnit === 'SEMANAS'
+      ? habit.currentStreak === 1
+        ? 'semana'
+        : 'semanas'
+      : habit.currentStreak === 1
+        ? 'dia'
+        : 'dias'
 
   return (
     <li className={`py-3 ${habit.archived ? 'opacity-60' : ''}`}>
@@ -57,13 +69,11 @@ function HabitRow({ habit }: { habit: Habit }) {
         <div className="min-w-40 flex-1">
           <p className="font-medium">{habit.name}</p>
           <p className="text-xs text-muted">
-            {scheduleLabel(habit)} · {habit.doneThisWeek}/{habit.targetThisWeek} nesta semana · {habit.rate30}% em 30 dias
+            {scheduleLabel(habit)} · {habit.doneThisWeek}/{habit.targetThisWeek} nesta semana · {habit.rate30}% em 30
+            dias
           </p>
         </div>
-        <span
-          className="inline-flex items-center gap-1 text-sm tabular-nums"
-          title={`Recorde: ${habit.bestStreak}`}
-        >
+        <span className="inline-flex items-center gap-1 text-sm tabular-nums" title={`Recorde: ${habit.bestStreak}`}>
           <Flame size={15} className={habit.currentStreak > 0 ? 'text-warning' : 'text-muted'} aria-hidden="true" />
           {habit.currentStreak} {unit}
         </span>
@@ -79,6 +89,9 @@ function HabitRow({ habit }: { habit: Habit }) {
           <IconButton label={`Calendário de ${habit.name}`} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
             <CalendarDays size={15} />
           </IconButton>
+          <EditButton label={`Editar ${habit.name}`} title="Editar hábito">
+            {(close) => <HabitForm initial={habit} onDone={close} />}
+          </EditButton>
           <IconButton
             label={habit.archived ? `Desarquivar ${habit.name}` : `Arquivar ${habit.name}`}
             onClick={() =>
@@ -109,34 +122,36 @@ function HabitRow({ habit }: { habit: Habit }) {
   )
 }
 
-function HabitForm() {
+/** Cria um hábito ou, com `initial`, edita esse hábito (o histórico de dias marcados continua). */
+function HabitForm({ initial, onDone }: { initial?: Habit; onDone?: () => void }) {
   const create = useCreateHabit()
-  const [schedule, setSchedule] = useState<HabitSchedule>('DIARIO')
-  const [weekdays, setWeekdays] = useState<number[]>([1, 3, 5])
-  const [color, setColor] = useState(COURSE_COLORS[0])
-  const errors = create.error instanceof ApiError ? create.error.errors : {}
+  const update = useUpdateHabit()
+  const save = initial ? update : create
+  const [schedule, setSchedule] = useState<HabitSchedule>(initial?.schedule ?? 'DIARIO')
+  const [weekdays, setWeekdays] = useState<number[]>(initial?.weekdays?.length ? initial.weekdays : [1, 3, 5])
+  const [color, setColor] = useState(initial?.color ?? COURSE_COLORS[0])
+  const errors = save.error instanceof ApiError ? save.error.errors : {}
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
-    create.mutate(
-      {
-        name: f.required('name'),
-        schedule,
-        weekdays: schedule === 'DIAS_SEMANA' ? weekdays : null,
-        timesPerWeek: schedule === 'X_POR_SEMANA' ? f.number('timesPerWeek') : null,
-        startsOn: f.text('startsOn'),
-        color,
-      },
-      { onSuccess: () => form.reset() },
-    )
+    const req = {
+      name: f.required('name'),
+      schedule,
+      weekdays: schedule === 'DIAS_SEMANA' ? weekdays : null,
+      timesPerWeek: schedule === 'X_POR_SEMANA' ? f.number('timesPerWeek') : null,
+      startsOn: f.text('startsOn'),
+      color,
+    }
+    if (initial) update.mutate({ id: initial.id, ...req, archived: initial.archived }, { onSuccess: onDone })
+    else create.mutate(req, { onSuccess: () => form.reset() })
   }
 
   return (
     <form onSubmit={submit} className="space-y-3">
       <Field label="Hábito" error={errors.name}>
-        <Input name="name" required maxLength={60} placeholder="Ex.: ler 20 minutos" />
+        <Input name="name" required maxLength={60} placeholder="Ex.: ler 20 minutos" defaultValue={initial?.name} />
       </Field>
       <fieldset>
         <legend className="mb-1 text-sm font-medium">Frequência</legend>
@@ -184,11 +199,11 @@ function HabitForm() {
       )}
       {schedule === 'X_POR_SEMANA' && (
         <Field label="Vezes por semana" error={errors.timesPerWeek}>
-          <Input name="timesPerWeek" type="number" min="1" max="7" defaultValue="3" required />
+          <Input name="timesPerWeek" type="number" min="1" max="7" defaultValue={initial?.timesPerWeek ?? 3} required />
         </Field>
       )}
       <Field label="Começa em" error={errors.startsOn}>
-        <Input name="startsOn" type="date" defaultValue={todayIso()} max={todayIso()} />
+        <Input name="startsOn" type="date" defaultValue={initial?.startsOn ?? todayIso()} max={todayIso()} />
       </Field>
       <fieldset>
         <legend className="mb-1 text-sm font-medium">Cor</legend>
@@ -206,9 +221,9 @@ function HabitForm() {
           ))}
         </div>
       </fieldset>
-      <ErrorText error={Object.keys(errors).length ? null : create.error} />
-      <Button type="submit" disabled={create.isPending}>
-        Criar hábito
+      <ErrorText error={Object.keys(errors).length ? null : save.error} />
+      <Button type="submit" disabled={save.isPending}>
+        {initial ? 'Salvar' : 'Criar hábito'}
       </Button>
     </form>
   )
@@ -221,8 +236,8 @@ export function HabitosPage() {
       <Card>
         <SectionTitle>Hábitos</SectionTitle>
         <p className="mb-2 text-xs text-muted">
-          Clique num dia para marcar ou desmarcar. Dias tracejados não fazem parte da frequência do hábito. Hoje
-          ainda não feito não quebra a sequência.
+          Clique num dia para marcar ou desmarcar. Dias tracejados não fazem parte da frequência do hábito. Hoje ainda
+          não feito não quebra a sequência.
         </p>
         <Loaded query={habits}>
           {(list) =>

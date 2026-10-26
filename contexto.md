@@ -1,6 +1,6 @@
 # Contexto do projeto — Vida (dashboard pessoal)
 
-Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 6**.
+Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 7**.
 
 ---
 
@@ -114,6 +114,7 @@ contexto.md          este arquivo
   - `useGet(path)` usa o próprio caminho como chave de cache: `['api', ...segmentos, query]`.
   - `useSend(method, path, prefixos)` invalida por prefixo. Cada módulo recarrega o módulo inteiro ao gravar, porque tudo nele se relaciona.
 - **Formulários:** não controlados, lidos com `formData(form)` (`lib/forms.ts`).
+- **Edição:** o mesmo componente cria e edita. Recebe `initial` (o item) e `onDone`; com `initial`, preenche os campos com `defaultValue`, chama o `PUT` e repassa os campos que não aparecem no formulário (ex.: `archived`, `status`, `score`), porque o `PUT` substitui tudo. O lápis é o `EditButton` (`components/Modal.tsx`), que abre um `<dialog>` nativo (foco preso, Esc fecha) e só monta o formulário com a janela aberta.
 - **Campos:** `Field` liga rótulo e campo por `id` (não envolve o campo) e associa o erro com `aria-describedby`.
 - **Datas:** `parseLocalDate` evita deslocar o dia pelo fuso; `todayIso()`; meses em `AAAA-MM`.
 - **Tema:** tokens em `index.css`:
@@ -240,6 +241,18 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
 - **Tela:** cartão "Atenção" (ou "Tudo em dia"), faixa de resumo e cartões. Concluir tarefa, marcar hábito e registrar métrica funcionam na própria tela.
 - **Integrações públicas novas:** `ReportService.overdueBills()` e `EventResponse.of` público.
 
+### Fase 7 — Edição (só front; a API já tinha os `PUT`)
+- **Lápis com o formulário da criação** em: evento; semestre, disciplina, avaliação, assunto e curso/livro; conta, cartão, categoria, lançamento e recorrência; hábito e métrica; meta, marco, projeto e tarefa.
+- **Regras da edição:**
+  - lançamento: o tipo não muda e não há campo de parcelas (cada parcela é editada sozinha); pagamento de fatura não tem lápis;
+  - categoria: o tipo não muda; quem tem subcategorias não pode virar subcategoria;
+  - recorrência: o tipo não muda; vale para os próximos lançamentos;
+  - avaliação: a nota continua sendo lançada na lista;
+  - disciplina, projeto e curso: a situação continua na própria lista;
+  - itens arquivados ou de outro semestre ligados ao item editado continuam nas listas de escolha, para não se perderem ao salvar.
+- **Assuntos:** ao criar ou editar uma avaliação, marcam-se os assuntos da disciplina que caem nela (a lista mostra "Assuntos: …"). Ao registrar uma sessão de estudo, escolhe-se o assunto (filtrado pela disciplina ou curso escolhido); o registro aparece como "Cálculo I · Limites".
+- **Tarefa:** a edição liga a tarefa a meta, marco (da meta escolhida), projeto e disciplina, além de título, prazo, prioridade e notas.
+
 ### Testes (65 no backend, todos passando)
 
 | Classe | Testes | O que cobre |
@@ -262,7 +275,7 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
 
 Todo módulo tem teste de **isolamento entre usuários** (o outro usuário recebe 404) e pelo menos um teste mostrando que a **FK composta barra o vínculo cruzado direto no banco**.
 
-O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das seis fases foram testados no Chromium com Playwright, incluindo o layout no celular.
+O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das sete fases foram testados no Chromium com Playwright, incluindo o layout no celular.
 
 ---
 
@@ -289,19 +302,14 @@ O autor já tem JDK 25, Node 22+ e Docker instalados na máquina.
 ## 8. Lacunas conhecidas (já combinadas ou anotadas)
 
 - **Acadêmico:**
-  - Escolher o assunto ao registrar uma sessão de estudo (a API aceita, a tela não).
-  - Ligar assuntos a uma prova pela tela.
-  - Editar nome ou cor de uma disciplina já criada.
+  - Editar uma sessão de estudo (a API não tem `PUT`; apaga e registra de novo).
+  - Mover uma disciplina para outro semestre.
+  - Editar horário e faltas (apaga e cria de novo).
 - **Finanças:**
-  - Editar um lançamento já criado pela tela (a API aceita; a tela só marca como pago ou apaga).
-  - Editar uma recorrência pela tela.
+  - Trocar o tipo de um lançamento ou editar todas as parcelas de uma vez.
   - Estorno no cartão.
   - Importar extrato.
-- **Saúde:**
-  - Editar nome, frequência ou meta de um hábito ou métrica já criados (só arquivar e apagar pela tela).
 - **Metas:**
-  - Editar título, prazo ou modo de uma meta pela tela (a API aceita; a tela atualiza só o valor manual e o status).
-  - Editar uma tarefa já criada (título, prazo, vínculos).
   - Metas dentro de metas (deixadas de fora; os marcos cobrem as etapas).
 - **Geral:**
   - Tema escuro.
@@ -309,7 +317,6 @@ O autor já tem JDK 25, Node 22+ e Docker instalados na máquina.
 
 ---
 
-## 9. Próximas fases (plano aprovado)
+## 9. Próximas fases
 
-### Fase 7 — Edição
-Editar pela tela, com o mesmo formulário da criação, o que hoje só dá para criar, arquivar e apagar: disciplina, lançamento, recorrência, hábito, métrica, meta e tarefa. Junto, escolher o assunto ao registrar uma sessão de estudo e ligar assuntos a uma prova.
+Nenhuma fase aprovada depois da 7. Candidatas: tema escuro, estorno no cartão, importação de extrato e, depois da v1, remédios, lembretes e PWA.

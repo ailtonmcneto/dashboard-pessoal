@@ -1,10 +1,11 @@
 import { Plus, Trash2 } from 'lucide-react'
 import type { FormEvent } from 'react'
 import type { Topic } from '../api/types'
-import { Button, Card, Empty, ErrorText, IconButton, Input, Loaded, SectionTitle } from '../components/ui'
+import { EditButton } from '../components/Modal'
+import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle } from '../components/ui'
 import { formData } from '../lib/forms'
 import { formatDate } from '../lib/format'
-import { useCreateTopic, useDeleteTopic, useReviewTopic, useTopics } from './api'
+import { useCreateTopic, useDeleteTopic, useReviewTopic, useTopics, useUpdateTopic } from './api'
 import { MASTERY } from './labels'
 
 /** Botões 0–5 para registrar uma revisão ("quanto você domina agora?"). */
@@ -31,6 +32,36 @@ export function ReviewButtons({ topic }: { topic: Topic }) {
   )
 }
 
+function TopicForm({ topic, onDone }: { topic: Topic; onDone: () => void }) {
+  const update = useUpdateTopic()
+
+  function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    update.mutate(
+      {
+        id: topic.id,
+        title: formData(e.currentTarget).required('title'),
+        courseId: topic.courseId,
+        resourceId: topic.resourceId,
+        parentId: topic.parentId,
+      },
+      { onSuccess: onDone },
+    )
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-3">
+      <Field label="Assunto">
+        <Input name="title" required maxLength={200} defaultValue={topic.title} />
+      </Field>
+      <ErrorText error={update.error} />
+      <Button type="submit" disabled={update.isPending}>
+        Salvar
+      </Button>
+    </form>
+  )
+}
+
 export function TopicRow({ topic, onDelete }: { topic: Topic; onDelete?: () => void }) {
   return (
     <li className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
@@ -45,6 +76,11 @@ export function TopicRow({ topic, onDelete }: { topic: Topic; onDelete?: () => v
         </p>
       </div>
       <ReviewButtons topic={topic} />
+      {onDelete && (
+        <EditButton label={`Editar ${topic.title}`} title="Editar assunto">
+          {(close) => <TopicForm topic={topic} onDone={close} />}
+        </EditButton>
+      )}
       {onDelete && (
         <IconButton label={`Excluir ${topic.title}`} onClick={onDelete}>
           <Trash2 size={14} />

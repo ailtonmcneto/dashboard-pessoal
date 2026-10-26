@@ -2,10 +2,31 @@ import { Trash2 } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { ApiError } from '../api/client'
 import { BarList, ColumnChart } from '../components/charts'
-import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle, Select, Textarea } from '../components/ui'
+import {
+  Button,
+  Card,
+  Empty,
+  ErrorText,
+  Field,
+  IconButton,
+  Input,
+  Loaded,
+  SectionTitle,
+  Select,
+  Textarea,
+} from '../components/ui'
 import { formData } from '../lib/forms'
 import { dayKey, formatMinutes, formatTime, formatWeekdayDate, parseLocalDate, todayIso } from '../lib/format'
-import { useCreateSession, useDeleteSession, useResources, useStudySessions, useStudySummary, useTermCourses, useTerms } from './api'
+import {
+  useCreateSession,
+  useDeleteSession,
+  useResources,
+  useStudySessions,
+  useStudySummary,
+  useTermCourses,
+  useTerms,
+  useTopics,
+} from './api'
 import { ColorDot } from './parts'
 
 const dayLabel = new Intl.DateTimeFormat('pt-BR', { weekday: 'short' })
@@ -26,7 +47,15 @@ function NewSessionForm() {
   const current = terms.data?.find((t) => t.current)
   const courses = useTermCourses(current?.id ?? null)
   const resources = useResources()
+  const topics = useTopics()
+  const [subject, setSubject] = useState('')
   const errors = create.error instanceof ApiError ? create.error.errors : {}
+
+  // assuntos do que foi escolhido (ou todos, sem vínculo); o assunto já liga a sessão à disciplina/curso dele
+  const [subjectKind, subjectId] = subject.split(':')
+  const subjectTopics = (topics.data ?? []).filter((t) =>
+    subjectKind === 'c' ? t.courseId === subjectId : subjectKind === 'r' ? t.resourceId === subjectId : true,
+  )
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -43,9 +72,15 @@ function NewSessionForm() {
         minutes,
         courseId: kind === 'c' ? id : null,
         resourceId: kind === 'r' ? id : null,
+        topicId: f.text('topicId'),
         notes: f.text('notes'),
       },
-      { onSuccess: () => form.reset() },
+      {
+        onSuccess: () => {
+          form.reset()
+          setSubject('')
+        },
+      },
     )
   }
 
@@ -57,7 +92,7 @@ function NewSessionForm() {
   return (
     <form onSubmit={submit} className="space-y-3">
       <Field label="O que estudou">
-        <Select name="subject" defaultValue="">
+        <Select name="subject" value={subject} onChange={(e) => setSubject(e.target.value)}>
           <option value="">Sem vínculo</option>
           {(courses.data ?? []).length > 0 && (
             <optgroup label="Disciplinas">
@@ -79,6 +114,18 @@ function NewSessionForm() {
           )}
         </Select>
       </Field>
+      {subjectTopics.length > 0 && (
+        <Field label="Assunto">
+          <Select name="topicId" key={subject} defaultValue="">
+            <option value="">Nenhum em especial</option>
+            {subjectTopics.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.title}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <Field label="Minutos" error={errors.minutes}>
           <Input name="minutes" type="number" min="1" max="1440" defaultValue="50" required />

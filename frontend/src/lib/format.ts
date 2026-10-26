@@ -13,6 +13,12 @@ export function dayKey(iso: string): string {
 /** Valor de <input type="datetime-local"> (hora local) → ISO UTC. */
 export const localInputToIso = (value: string) => new Date(value).toISOString()
 
+/** ISO → valor de <input type="datetime-local"> na hora local (para preencher formulários de edição). */
+export function isoToLocalInput(iso: string): string {
+  const d = new Date(iso)
+  return `${dayKey(iso)}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
 export const browserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone
 
 /** 'AAAA-MM-DD' (LocalDate da API) como data local, sem deslocar o dia pelo fuso. */

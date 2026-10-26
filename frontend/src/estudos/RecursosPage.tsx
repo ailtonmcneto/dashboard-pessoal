@@ -3,7 +3,19 @@ import type { FormEvent } from 'react'
 import { ApiError } from '../api/client'
 import type { ResourceKind, ResourceStatus, StudyResource } from '../api/types'
 import { Meter } from '../components/charts'
-import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle, Select } from '../components/ui'
+import { EditButton } from '../components/Modal'
+import {
+  Button,
+  Card,
+  Empty,
+  ErrorText,
+  Field,
+  IconButton,
+  Input,
+  Loaded,
+  SectionTitle,
+  Select,
+} from '../components/ui'
 import { formData } from '../lib/forms'
 import { useCreateResource, useDeleteResource, useResources, useUpdateResource } from './api'
 import { RESOURCE_KIND, RESOURCE_STATUS } from './labels'
@@ -34,7 +46,13 @@ function ResourceRow({ r }: { r: StudyResource }) {
           <p className="flex items-center gap-1 font-medium">
             <span className="truncate">{r.title}</span>
             {r.url && (
-              <a href={r.url} target="_blank" rel="noreferrer" className="text-muted hover:text-accent" aria-label="Abrir link">
+              <a
+                href={r.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted hover:text-accent"
+                aria-label="Abrir link"
+              >
                 <ExternalLink size={14} />
               </a>
             )}
@@ -54,6 +72,9 @@ function ResourceRow({ r }: { r: StudyResource }) {
             ))}
           </Select>
         </div>
+        <EditButton label={`Editar ${r.title}`} title="Editar recurso">
+          {(close) => <ResourceForm initial={r} onDone={close} />}
+        </EditButton>
         <IconButton label={`Excluir ${r.title}`} onClick={() => remove.mutate(r.id)}>
           <Trash2 size={15} />
         </IconButton>
@@ -87,28 +108,87 @@ function ResourceRow({ r }: { r: StudyResource }) {
   )
 }
 
-export function RecursosPage() {
-  const list = useResources()
+/** Cria um recurso ou, com `initial`, edita esse recurso. */
+function ResourceForm({ initial, onDone }: { initial?: StudyResource; onDone?: () => void }) {
   const create = useCreateResource()
-  const errors = create.error instanceof ApiError ? create.error.errors : {}
+  const update = useUpdateResource()
+  const save = initial ? update : create
+  const errors = save.error instanceof ApiError ? save.error.errors : {}
 
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
-    create.mutate(
-      {
-        title: f.required('title'),
-        kind: f.text('kind') as ResourceKind,
-        provider: f.text('provider'),
-        url: f.text('url'),
-        totalUnits: f.number('totalUnits'),
-        doneUnits: f.number('doneUnits'),
-        status: f.text('status') as ResourceStatus,
-      },
-      { onSuccess: () => form.reset() },
-    )
+    const req = {
+      title: f.required('title'),
+      kind: f.text('kind') as ResourceKind,
+      provider: f.text('provider'),
+      url: f.text('url'),
+      totalUnits: f.number('totalUnits'),
+      doneUnits: f.number('doneUnits'),
+      status: f.text('status') as ResourceStatus,
+    }
+    if (initial) {
+      const sameStatus = req.status === initial.status
+      update.mutate(
+        {
+          id: initial.id,
+          ...req,
+          startedOn: initial.startedOn,
+          finishedOn: sameStatus ? initial.finishedOn : null,
+        },
+        { onSuccess: onDone },
+      )
+    } else create.mutate(req, { onSuccess: () => form.reset() })
   }
+
+  return (
+    <form onSubmit={submit} className="space-y-3">
+      <Field label="Título" error={errors.title}>
+        <Input name="title" required maxLength={200} defaultValue={initial?.title} />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Tipo">
+          <Select name="kind" defaultValue={initial?.kind ?? 'CURSO'}>
+            {Object.entries(RESOURCE_KIND).map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Situação">
+          <Select name="status" defaultValue={initial?.status ?? 'ATIVO'}>
+            {Object.entries(RESOURCE_STATUS).map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Total (aulas, cap.…)" error={errors.totalUnits}>
+          <Input name="totalUnits" type="number" min="1" defaultValue={initial?.totalUnits ?? ''} />
+        </Field>
+        <Field label="Já feitas" error={errors.doneUnits}>
+          <Input name="doneUnits" type="number" min="0" defaultValue={initial?.doneUnits ?? ''} />
+        </Field>
+      </div>
+      <Field label="Plataforma / autor" error={errors.provider}>
+        <Input name="provider" maxLength={120} defaultValue={initial?.provider ?? ''} />
+      </Field>
+      <Field label="Link" error={errors.url}>
+        <Input name="url" type="url" placeholder="https://" maxLength={500} defaultValue={initial?.url ?? ''} />
+      </Field>
+      <ErrorText error={Object.keys(errors).length ? null : save.error} />
+      <Button type="submit" disabled={save.isPending}>
+        {initial ? 'Salvar' : 'Adicionar'}
+      </Button>
+    </form>
+  )
+}
+
+export function RecursosPage() {
+  const list = useResources()
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -130,47 +210,7 @@ export function RecursosPage() {
       </Card>
       <Card className="self-start">
         <SectionTitle>Adicionar</SectionTitle>
-        <form onSubmit={submit} className="space-y-3">
-          <Field label="Título" error={errors.title}>
-            <Input name="title" required maxLength={200} />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Tipo">
-              <Select name="kind" defaultValue="CURSO">
-                {Object.entries(RESOURCE_KIND).map(([v, l]) => (
-                  <option key={v} value={v}>
-                    {l}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Situação">
-              <Select name="status" defaultValue="ATIVO">
-                {Object.entries(RESOURCE_STATUS).map(([v, l]) => (
-                  <option key={v} value={v}>
-                    {l}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Total (aulas, cap.…)" error={errors.totalUnits}>
-              <Input name="totalUnits" type="number" min="1" />
-            </Field>
-            <Field label="Já feitas" error={errors.doneUnits}>
-              <Input name="doneUnits" type="number" min="0" />
-            </Field>
-          </div>
-          <Field label="Plataforma / autor" error={errors.provider}>
-            <Input name="provider" maxLength={120} />
-          </Field>
-          <Field label="Link" error={errors.url}>
-            <Input name="url" type="url" placeholder="https://" maxLength={500} />
-          </Field>
-          <ErrorText error={Object.keys(errors).length ? null : create.error} />
-          <Button type="submit" disabled={create.isPending}>
-            Adicionar
-          </Button>
-        </form>
+        <ResourceForm />
       </Card>
     </div>
   )

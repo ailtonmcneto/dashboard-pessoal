@@ -4,7 +4,20 @@ import { Link } from 'react-router'
 import { ApiError } from '../api/client'
 import type { Project, ProjectKind, ProjectStatus } from '../api/types'
 import { Meter } from '../components/charts'
-import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle, Select, Textarea } from '../components/ui'
+import { EditButton } from '../components/Modal'
+import {
+  Button,
+  Card,
+  Empty,
+  ErrorText,
+  Field,
+  IconButton,
+  Input,
+  Loaded,
+  SectionTitle,
+  Select,
+  Textarea,
+} from '../components/ui'
 import { useTermCourses, useTerms } from '../estudos/api'
 import { formData } from '../lib/forms'
 import { formatDate } from '../lib/format'
@@ -24,7 +37,13 @@ function ProjectRow({ p }: { p: Project }) {
           <p className="flex items-center gap-1 font-medium">
             {p.title}
             {p.url && (
-              <a href={p.url} target="_blank" rel="noreferrer" className="text-muted hover:text-accent" aria-label="Abrir link">
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted hover:text-accent"
+                aria-label="Abrir link"
+              >
                 <ExternalLink size={14} />
               </a>
             )}
@@ -75,6 +94,9 @@ function ProjectRow({ p }: { p: Project }) {
             ))}
           </Select>
         </div>
+        <EditButton label={`Editar ${p.title}`} title="Editar projeto">
+          {(close) => <ProjectForm initial={p} onDone={close} />}
+        </EditButton>
         <IconButton label={`Tarefas de ${p.title}`} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           <ListChecks size={16} />
         </IconButton>
@@ -104,37 +126,54 @@ function ProjectRow({ p }: { p: Project }) {
   )
 }
 
-function ProjectForm() {
+/** Cria um projeto ou, com `initial`, edita esse projeto (a situação muda na própria lista). */
+function ProjectForm({ initial, onDone }: { initial?: Project; onDone?: () => void }) {
   const create = useCreateProject()
-  const goals = (useGoals().data ?? []).filter((g) => g.status === 'ATIVA')
+  const update = useUpdateProject()
+  const save = initial ? update : create
+  const goals = (useGoals().data ?? []).filter((g) => g.status === 'ATIVA' || g.id === initial?.goalId)
   const current = useTerms().data?.find((t) => t.current)
-  const courses = useTermCourses(current?.id ?? null).data ?? []
-  const errors = create.error instanceof ApiError ? create.error.errors : {}
+  const termCourses = useTermCourses(current?.id ?? null).data ?? []
+  // a disciplina ligada pode ser de outro semestre: continua na lista para não se perder ao salvar
+  const courses =
+    initial?.courseId && !termCourses.some((c) => c.id === initial.courseId)
+      ? [...termCourses, { id: initial.courseId, name: initial.courseName ?? 'Disciplina' }]
+      : termCourses
+  const errors = save.error instanceof ApiError ? save.error.errors : {}
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const form = e.currentTarget
     const f = formData(form)
-    create.mutate(
-      {
-        title: f.required('title'),
-        description: f.text('description'),
-        kind: f.text('kind') as ProjectKind,
-        dueOn: f.text('dueOn'),
-        url: f.text('url'),
-        goalId: f.text('goalId'),
-        courseId: f.text('courseId'),
-      },
-      { onSuccess: () => form.reset() },
-    )
+    const req = {
+      title: f.required('title'),
+      description: f.text('description'),
+      kind: f.text('kind') as ProjectKind,
+      dueOn: f.text('dueOn'),
+      url: f.text('url'),
+      goalId: f.text('goalId'),
+      courseId: f.text('courseId'),
+    }
+    if (initial) {
+      update.mutate(
+        { id: initial.id, ...req, status: initial.status, startsOn: initial.startsOn },
+        { onSuccess: onDone },
+      )
+    } else create.mutate(req, { onSuccess: () => form.reset() })
   }
   return (
     <form onSubmit={submit} className="space-y-3">
       <Field label="Projeto" error={errors.title}>
-        <Input name="title" required maxLength={120} placeholder="Ex.: portfólio pessoal" />
+        <Input
+          name="title"
+          required
+          maxLength={120}
+          placeholder="Ex.: portfólio pessoal"
+          defaultValue={initial?.title}
+        />
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Tipo">
-          <Select name="kind" defaultValue="PESSOAL">
+          <Select name="kind" defaultValue={initial?.kind ?? 'PESSOAL'}>
             {Object.entries(PROJECT_KIND).map(([v, l]) => (
               <option key={v} value={v}>
                 {l}
@@ -143,11 +182,11 @@ function ProjectForm() {
           </Select>
         </Field>
         <Field label="Prazo" error={errors.dueOn}>
-          <Input name="dueOn" type="date" />
+          <Input name="dueOn" type="date" defaultValue={initial?.dueOn ?? ''} />
         </Field>
       </div>
       <Field label="Serve à meta">
-        <Select name="goalId" defaultValue="">
+        <Select name="goalId" defaultValue={initial?.goalId ?? ''}>
           <option value="">—</option>
           {goals.map((g) => (
             <option key={g.id} value={g.id}>
@@ -158,7 +197,7 @@ function ProjectForm() {
       </Field>
       {courses.length > 0 && (
         <Field label="Disciplina">
-          <Select name="courseId" defaultValue="">
+          <Select name="courseId" defaultValue={initial?.courseId ?? ''}>
             <option value="">—</option>
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
@@ -169,14 +208,20 @@ function ProjectForm() {
         </Field>
       )}
       <Field label="Link" error={errors.url}>
-        <Input name="url" type="url" placeholder="https://github.com/…" maxLength={500} />
+        <Input
+          name="url"
+          type="url"
+          placeholder="https://github.com/…"
+          maxLength={500}
+          defaultValue={initial?.url ?? ''}
+        />
       </Field>
       <Field label="Descrição">
-        <Textarea name="description" rows={2} maxLength={2000} />
+        <Textarea name="description" rows={2} maxLength={2000} defaultValue={initial?.description ?? ''} />
       </Field>
-      <ErrorText error={Object.keys(errors).length ? null : create.error} />
-      <Button type="submit" disabled={create.isPending}>
-        Criar projeto
+      <ErrorText error={Object.keys(errors).length ? null : save.error} />
+      <Button type="submit" disabled={save.isPending}>
+        {initial ? 'Salvar' : 'Criar projeto'}
       </Button>
     </form>
   )

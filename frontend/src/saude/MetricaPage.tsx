@@ -3,11 +3,29 @@ import { type FormEvent, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import type { Metric } from '../api/types'
 import { ColumnChart, LineChart } from '../components/charts'
+import { EditButton } from '../components/Modal'
 import { Button, Card, Empty, ErrorText, Field, IconButton, Input, Loaded, SectionTitle } from '../components/ui'
 import { formData } from '../lib/forms'
-import { addDaysIso, dayKey, formatTime, formatWeekdayDate, localInputToIso, parseLocalDate, todayIso } from '../lib/format'
-import { useAddMeasurement, useDeleteMeasurement, useDeleteMetric, useMeasurements, useMetrics, useSeries, useUpdateMetric } from './api'
+import {
+  addDaysIso,
+  dayKey,
+  formatTime,
+  formatWeekdayDate,
+  localInputToIso,
+  parseLocalDate,
+  todayIso,
+} from '../lib/format'
+import {
+  useAddMeasurement,
+  useDeleteMeasurement,
+  useDeleteMetric,
+  useMeasurements,
+  useMetrics,
+  useSeries,
+  useUpdateMetric,
+} from './api'
 import { AGGREGATION, formatValue } from './labels'
+import { MetricForm } from './MetricasPage'
 
 const shortDay = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' })
 const RANGES = [7, 30, 90]
@@ -17,9 +35,13 @@ function Chart({ metric, days }: { metric: Metric; days: number }) {
   const from = addDaysIso(to, -(days - 1))
   const series = useSeries(metric.id, from, to)
   const format = (v: number) => formatValue(v, metric.unit)
-  const reference = metric.target != null
-    ? { value: metric.target, label: `${metric.targetKind === 'MINIMO' ? 'meta' : 'limite'} ${format(metric.target)}` }
-    : undefined
+  const reference =
+    metric.target != null
+      ? {
+          value: metric.target,
+          label: `${metric.targetKind === 'MINIMO' ? 'meta' : 'limite'} ${format(metric.target)}`,
+        }
+      : undefined
   return (
     <Loaded query={series}>
       {(data) =>
@@ -28,7 +50,11 @@ function Chart({ metric, days }: { metric: Metric; days: number }) {
             caption={`${metric.name} por dia`}
             format={format}
             reference={reference}
-            data={data.map((d) => ({ key: d.date, label: shortDay.format(parseLocalDate(d.date)), value: d.value ?? 0 }))}
+            data={data.map((d) => ({
+              key: d.date,
+              label: shortDay.format(parseLocalDate(d.date)),
+              value: d.value ?? 0,
+            }))}
           />
         ) : (
           <LineChart
@@ -36,7 +62,11 @@ function Chart({ metric, days }: { metric: Metric; days: number }) {
             format={format}
             reference={reference}
             showEvery={Math.ceil(days / 6)}
-            data={data.map((d) => ({ key: d.date, label: shortDay.format(parseLocalDate(d.date)), value: d.value ?? null }))}
+            data={data.map((d) => ({
+              key: d.date,
+              label: shortDay.format(parseLocalDate(d.date)),
+              value: d.value ?? null,
+            }))}
           />
         )
       }
@@ -52,7 +82,12 @@ function AddForm({ metric }: { metric: Metric }) {
     const f = formData(form)
     const when = f.text('when')
     add.mutate(
-      { metricId: metric.id, value: f.number('value') ?? 0, measuredAt: when ? localInputToIso(when) : null, note: f.text('note') },
+      {
+        metricId: metric.id,
+        value: f.number('value') ?? 0,
+        measuredAt: when ? localInputToIso(when) : null,
+        note: f.text('note'),
+      },
       { onSuccess: () => form.reset() },
     )
   }
@@ -98,7 +133,9 @@ export function MetricaPage() {
                 <ArrowLeft size={18} />
               </Link>
               <h2 className="text-xl font-semibold">{m.name}</h2>
-              <span className="text-sm text-muted">{AGGREGATION[m.aggregation]} · {m.unit}</span>
+              <span className="text-sm text-muted">
+                {AGGREGATION[m.aggregation]} · {m.unit}
+              </span>
               <div className="ml-auto flex items-center gap-1">
                 <Button
                   variant="ghost"
@@ -117,6 +154,9 @@ export function MetricaPage() {
                 >
                   {m.archived ? 'Desarquivar' : 'Arquivar'}
                 </Button>
+                <EditButton label={`Editar ${m.name}`} title="Editar métrica">
+                  {(close) => <MetricForm initial={m} onDone={close} />}
+                </EditButton>
                 <IconButton
                   label={`Apagar ${m.name}`}
                   onClick={() =>

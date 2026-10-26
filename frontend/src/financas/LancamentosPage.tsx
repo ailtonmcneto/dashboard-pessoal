@@ -1,10 +1,18 @@
 import { Check, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import type { Transaction } from '../api/types'
+import { EditButton } from '../components/Modal'
 import { Card, Empty, IconButton, Loaded, SectionTitle, Select } from '../components/ui'
 import { ColorDot } from '../estudos/parts'
 import { formatMoney, formatWeekdayDate } from '../lib/format'
-import { useAccounts, useCards, useCategories, useDeleteTransaction, useTransactions, useUpdateTransaction } from './api'
+import {
+  useAccounts,
+  useCards,
+  useCategories,
+  useDeleteTransaction,
+  useTransactions,
+  useUpdateTransaction,
+} from './api'
 import { categoryLabel, categoryOptions } from './labels'
 import { makeLookup } from './lookup'
 import { MonthPicker } from './MonthPicker'
@@ -83,7 +91,11 @@ export function LancamentosPage() {
             </Select>
           </div>
           <div className="w-44">
-            <Select aria-label="Filtrar por categoria" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <Select
+              aria-label="Filtrar por categoria"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
               <option value="">Todas as categorias</option>
               {[...categoryOptions(categories, 'DESPESA'), ...categoryOptions(categories, 'RECEITA')].map((c) => (
                 <option key={c.id} value={c.id}>
@@ -130,6 +142,11 @@ export function LancamentosPage() {
                                   </button>
                                 )}
                                 <span className="w-28 text-right text-sm tabular-nums">{signed(t)}</span>
+                                {t.kind !== 'PAGAMENTO_FATURA' && (
+                                  <EditButton label={`Editar ${t.description}`} title="Editar lançamento">
+                                    {(close) => <TransactionForm initial={t} onDone={close} />}
+                                  </EditButton>
+                                )}
                                 <IconButton label={`Apagar ${t.description}`} onClick={() => del(t)}>
                                   <Trash2 size={14} />
                                 </IconButton>

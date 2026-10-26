@@ -1,5 +1,15 @@
 import { useGet, useSend } from '../api/hooks'
-import type { Goal, GoalRequest, GoalStatus, MilestoneRequest, Project, ProjectRequest, Task, TaskRequest, TaskView } from '../api/types'
+import type {
+  Goal,
+  GoalRequest,
+  GoalStatus,
+  MilestoneRequest,
+  Project,
+  ProjectRequest,
+  Task,
+  TaskRequest,
+  TaskView,
+} from '../api/types'
 
 /** Tarefa mexe em meta e projeto (progresso): recarrega os três. */
 const ALL = ['goals', 'milestones', 'projects', 'tasks']
@@ -28,6 +38,7 @@ export const useAddMilestone = (goalId: string) =>
   useSend<MilestoneRequest>('POST', () => `/goals/${goalId}/milestones`, ALL)
 export const useToggleMilestone = () =>
   useSend<{ id: string; done: boolean }>('POST', (m) => `/milestones/${m.id}/${m.done ? 'done' : 'undone'}`, ALL)
+export const useUpdateMilestone = () => useSend<WithId<MilestoneRequest>>('PUT', (m) => `/milestones/${m.id}`, ALL)
 export const useDeleteMilestone = () => useSend<string>('DELETE', (id) => `/milestones/${id}`, ALL)
 
 export const useCreateProject = () => useSend<ProjectRequest>('POST', () => '/projects', ALL)
@@ -37,4 +48,5 @@ export const useDeleteProject = () => useSend<string>('DELETE', (id) => `/projec
 export const useCreateTask = () => useSend<TaskRequest>('POST', () => '/tasks', ALL)
 export const useToggleTask = () =>
   useSend<{ id: string; done: boolean }>('POST', (t) => `/tasks/${t.id}/${t.done ? 'done' : 'undone'}`, ALL)
+export const useUpdateTask = () => useSend<WithId<TaskRequest>>('PUT', (t) => `/tasks/${t.id}`, ALL)
 export const useDeleteTask = () => useSend<string>('DELETE', (id) => `/tasks/${id}`, ALL)

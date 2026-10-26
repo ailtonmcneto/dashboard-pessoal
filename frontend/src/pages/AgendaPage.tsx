@@ -1,45 +1,54 @@
 import { type FormEvent, useState } from 'react'
 import { ApiError } from '../api/client'
-import type { EventKind } from '../api/types'
+import type { EventItem, EventKind } from '../api/types'
 import { EventList } from '../agenda/EventList'
-import { KIND_LABEL, useCreateEvent, useDeleteEvent, useUpcomingEvents } from '../agenda/events'
-import { Button, Card, ErrorText, Field, Input, PageHeader, Select } from '../components/ui'
-import { localInputToIso } from '../lib/format'
+import { KIND_LABEL, useCreateEvent, useDeleteEvent, useUpcomingEvents, useUpdateEvent } from '../agenda/events'
+import { EditButton } from '../components/Modal'
+import { Button, Card, ErrorText, Field, Input, PageHeader, Select, Textarea } from '../components/ui'
+import { isoToLocalInput, localInputToIso } from '../lib/format'
 
-function NewEventForm() {
+/** Cria um evento ou, com `initial`, edita esse evento (o mesmo formulário, já preenchido). */
+function EventForm({ initial, onDone }: { initial?: EventItem; onDone?: () => void }) {
   const create = useCreateEvent()
-  const [title, setTitle] = useState('')
-  const [kind, setKind] = useState<EventKind>('COMPROMISSO')
-  const [startsAt, setStartsAt] = useState('')
-  const [endsAt, setEndsAt] = useState('')
-  const [location, setLocation] = useState('')
+  const update = useUpdateEvent()
+  const save = initial ? update : create
+  const [title, setTitle] = useState(initial?.title ?? '')
+  const [kind, setKind] = useState<EventKind>(initial?.kind ?? 'COMPROMISSO')
+  const [startsAt, setStartsAt] = useState(initial ? isoToLocalInput(initial.startsAt) : '')
+  const [endsAt, setEndsAt] = useState(initial?.endsAt ? isoToLocalInput(initial.endsAt) : '')
+  const [location, setLocation] = useState(initial?.location ?? '')
+  const [notes, setNotes] = useState(initial?.notes ?? '')
 
-  const fieldErrors = create.error instanceof ApiError ? create.error.errors : {}
+  const fieldErrors = save.error instanceof ApiError ? save.error.errors : {}
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    create.mutate(
-      {
-        title,
-        kind,
-        startsAt: localInputToIso(startsAt),
-        endsAt: endsAt ? localInputToIso(endsAt) : null,
-        location: location || null,
+    const req = {
+      title,
+      kind,
+      startsAt: localInputToIso(startsAt),
+      endsAt: endsAt ? localInputToIso(endsAt) : null,
+      location: location || null,
+      notes: notes || null,
+    }
+    if (initial) {
+      update.mutate({ id: initial.id, ...req }, { onSuccess: onDone })
+      return
+    }
+    create.mutate(req, {
+      onSuccess: () => {
+        setTitle('')
+        setStartsAt('')
+        setEndsAt('')
+        setLocation('')
+        setNotes('')
       },
-      {
-        onSuccess: () => {
-          setTitle('')
-          setStartsAt('')
-          setEndsAt('')
-          setLocation('')
-        },
-      },
-    )
+    })
   }
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <h2 className="font-semibold">Novo evento</h2>
+      {!initial && <h2 className="font-semibold">Novo evento</h2>}
       <Field label="Título" error={fieldErrors.title}>
         <Input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={200} />
       </Field>
@@ -63,9 +72,14 @@ function NewEventForm() {
       <Field label="Local">
         <Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} />
       </Field>
-      <ErrorText error={create.error} />
-      <Button type="submit" disabled={create.isPending}>
-        Adicionar
+      {initial && (
+        <Field label="Observações">
+          <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </Field>
+      )}
+      <ErrorText error={save.error} />
+      <Button type="submit" disabled={save.isPending}>
+        {initial ? 'Salvar' : 'Adicionar'}
       </Button>
     </form>
   )
@@ -85,11 +99,19 @@ export function AgendaPage() {
           ) : events.isError ? (
             <ErrorText error={events.error} />
           ) : (
-            <EventList events={events.data} onDelete={(id) => remove.mutate(id)} />
+            <EventList
+              events={events.data}
+              onDelete={(id) => remove.mutate(id)}
+              edit={(ev) => (
+                <EditButton label={`Editar ${ev.title}`} title="Editar evento">
+                  {(close) => <EventForm initial={ev} onDone={close} />}
+                </EditButton>
+              )}
+            />
           )}
         </Card>
         <Card className="self-start">
-          <NewEventForm />
+          <EventForm />
         </Card>
       </div>
     </>

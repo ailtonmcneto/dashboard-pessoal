@@ -30,7 +30,10 @@ export const useCards = () => useGet<Card[]>('/cards')
 export const useInvoice = (cardId: string | null, month: string) =>
   useGet<Invoice>(cardId ? `/cards/${cardId}/invoices/${month}` : null)
 export const useCategories = () => useGet<Category[]>('/categories')
-export const useTransactions = (month: string, filter: { accountId?: string; cardId?: string; categoryId?: string }) => {
+export const useTransactions = (
+  month: string,
+  filter: { accountId?: string; cardId?: string; categoryId?: string },
+) => {
   const qs = new URLSearchParams({ month })
   Object.entries(filter).forEach(([k, v]) => v && qs.set(k, v))
   return useGet<Transaction[]>(`/transactions?${qs}`)
@@ -69,6 +72,7 @@ export const useDeleteTransaction = () =>
   )
 
 export const useCreateRecurrence = () => useSend<RecurrenceRequest>('POST', () => '/recurrences', ALL)
+export const useUpdateRecurrence = () => useSend<WithId<RecurrenceRequest>>('PUT', (r) => `/recurrences/${r.id}`, ALL)
 export const useDeleteRecurrence = () => useSend<string>('DELETE', (id) => `/recurrences/${id}`, ALL)
 export const useToggleRecurrence = () =>
   useSend<{ id: string; active: boolean }>('POST', (r) => `/recurrences/${r.id}/${r.active ? 'resume' : 'pause'}`, ALL)

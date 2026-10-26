@@ -27,8 +27,7 @@ type WithId<T> = T & { id: string }
 // ---------- leitura ----------
 
 export const useTerms = () => useGet<Term[]>('/terms')
-export const useTermCourses = (termId: string | null) =>
-  useGet<Course[]>(termId ? `/terms/${termId}/courses` : null)
+export const useTermCourses = (termId: string | null) => useGet<Course[]>(termId ? `/terms/${termId}/courses` : null)
 export const useCourse = (id: string) => useGet<Course>(`/courses/${id}`)
 export const useCourseSlots = (id: string) => useGet<Slot[]>(`/courses/${id}/slots`)
 export const useCourseAbsences = (id: string) => useGet<Absence[]>(`/courses/${id}/absences`)
@@ -50,15 +49,14 @@ export const useStudySummary = (from: string, to: string) =>
 // ---------- escrita ----------
 
 export const useCreateTerm = () => useSend<TermRequest, Term>('POST', () => '/terms', ALL)
+export const useUpdateTerm = () => useSend<WithId<TermRequest>, Term>('PUT', (t) => `/terms/${t.id}`, ALL)
 export const useDeleteTerm = () => useSend<string>('DELETE', (id) => `/terms/${id}`, ALL)
 
 export const useCreateCourse = () => useSend<CourseRequest, Course>('POST', () => '/courses', ALL)
-export const useUpdateCourse = () =>
-  useSend<WithId<CourseRequest>, Course>('PUT', (c) => `/courses/${c.id}`, ALL)
+export const useUpdateCourse = () => useSend<WithId<CourseRequest>, Course>('PUT', (c) => `/courses/${c.id}`, ALL)
 export const useDeleteCourse = () => useSend<string>('DELETE', (id) => `/courses/${id}`, ALL)
 
-export const useAddSlot = (courseId: string) =>
-  useSend<SlotRequest>('POST', () => `/courses/${courseId}/slots`, ALL)
+export const useAddSlot = (courseId: string) => useSend<SlotRequest>('POST', () => `/courses/${courseId}/slots`, ALL)
 export const useDeleteSlot = () => useSend<string>('DELETE', (id) => `/slots/${id}`, ALL)
 
 export const useAddAbsence = (courseId: string) =>
@@ -67,16 +65,15 @@ export const useDeleteAbsence = () => useSend<string>('DELETE', (id) => `/absenc
 
 export const useAddAssessment = (courseId: string) =>
   useSend<AssessmentRequest>('POST', () => `/courses/${courseId}/assessments`, ALL)
-export const useUpdateAssessment = () =>
-  useSend<WithId<AssessmentRequest>>('PUT', (a) => `/assessments/${a.id}`, ALL)
+export const useUpdateAssessment = () => useSend<WithId<AssessmentRequest>>('PUT', (a) => `/assessments/${a.id}`, ALL)
 export const useDeleteAssessment = () => useSend<string>('DELETE', (id) => `/assessments/${id}`, ALL)
 
 export const useCreateResource = () => useSend<ResourceRequest>('POST', () => '/resources', ALL)
-export const useUpdateResource = () =>
-  useSend<WithId<ResourceRequest>>('PUT', (r) => `/resources/${r.id}`, ALL)
+export const useUpdateResource = () => useSend<WithId<ResourceRequest>>('PUT', (r) => `/resources/${r.id}`, ALL)
 export const useDeleteResource = () => useSend<string>('DELETE', (id) => `/resources/${id}`, ALL)
 
 export const useCreateTopic = () => useSend<TopicRequest>('POST', () => '/topics', ALL)
+export const useUpdateTopic = () => useSend<WithId<TopicRequest>>('PUT', (t) => `/topics/${t.id}`, ALL)
 export const useReviewTopic = () =>
   useSend<{ id: string; mastery: number }>('POST', (r) => `/topics/${r.id}/review`, ALL)
 export const useDeleteTopic = () => useSend<string>('DELETE', (id) => `/topics/${id}`, ALL)
