@@ -2,7 +2,7 @@
 // barras ≤ 24px com ponta arredondada de 4px e base reta, linha de base fina, valores em cor
 // de texto (nunca na cor do dado), tooltip ao passar o mouse e tabela para leitores de tela.
 
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 
 export type Datum = { key: string; label: string; value: number }
 
@@ -12,18 +12,29 @@ export function ColumnChart({
   format,
   height = 140,
   caption,
+  reference,
 }: {
   data: Datum[]
   format: (v: number) => string
   height?: number
   caption: string
+  /** Linha fina de referência (ex.: meta), com rótulo. */
+  reference?: { value: number; label: string }
 }) {
-  const max = Math.max(...data.map((d) => d.value), 1)
+  const max = Math.max(...data.map((d) => d.value), reference?.value ?? 0, 1)
   const peak = data.reduce((best, d) => (d.value > best.value ? d : best), data[0])
 
   return (
     <figure>
-      <div className="flex items-end gap-0.5 border-b border-line" style={{ height }} aria-hidden="true">
+      <div className="relative flex items-end gap-0.5 border-b border-line" style={{ height }} aria-hidden="true">
+        {reference && (
+          <div
+            className="pointer-events-none absolute inset-x-0 border-t border-muted/60"
+            style={{ bottom: (reference.value / max) * (height - 20) }}
+          >
+            <span className="absolute -top-4 right-0 text-[10px] text-muted">{reference.label}</span>
+          </div>
+        )}
         {data.map((d) => {
           const h = d.value === 0 ? 0 : Math.max(2, (d.value / max) * (height - 20))
           return (
@@ -216,6 +227,132 @@ export function GroupedColumns({
           ))}
         </tbody>
       </table>
+    </figure>
+  )
+}
+
+export type LinePoint = { key: string; label: string; value: number | null }
+
+/**
+ * Linha de uma série ao longo do tempo (ex.: peso). A linha liga os dias que têm registro (medições
+ * espaçadas são o normal) e cada registro ganha um ponto. A escala vertical acompanha os dados
+ * (não começa no zero), porque o que importa é a tendência.
+ */
+export function LineChart({
+  data,
+  format,
+  height = 160,
+  caption,
+  reference,
+  showEvery = 5,
+}: {
+  data: LinePoint[]
+  format: (v: number) => string
+  height?: number
+  caption: string
+  reference?: { value: number; label: string }
+  /** Mostra o rótulo do eixo a cada N pontos. */
+  showEvery?: number
+}) {
+  const [hover, setHover] = useState<number | null>(null)
+  const values = data.map((d) => d.value).filter((v): v is number => v !== null)
+  const width = 600
+  const pad = 8
+  if (values.length === 0) {
+    return <p className="text-sm text-muted">Sem registros no período.</p>
+  }
+  let min = Math.min(...values, reference?.value ?? Infinity)
+  let max = Math.max(...values, reference?.value ?? -Infinity)
+  if (min === max) {
+    min -= 1
+    max += 1
+  }
+  const span = max - min
+  min -= span * 0.1
+  max += span * 0.1
+  const x = (i: number) => (data.length === 1 ? width / 2 : (i / (data.length - 1)) * width)
+  const y = (v: number) => pad + (1 - (v - min) / (max - min)) * (height - 2 * pad)
+
+  const path = data
+    .map((d, i) => (d.value === null ? null : `${x(i).toFixed(1)},${y(d.value).toFixed(1)}`))
+    .filter(Boolean)
+    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p}`)
+    .join(' ')
+
+  const h = hover !== null ? data[hover] : null
+  return (
+    <figure>
+      <div className="relative" aria-hidden="true">
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full overflow-visible" preserveAspectRatio="none">
+          <line x1={0} x2={width} y1={height - 0.5} y2={height - 0.5} stroke="var(--color-line)" strokeWidth={1} />
+          {reference && (
+            <line
+              x1={0}
+              x2={width}
+              y1={y(reference.value)}
+              y2={y(reference.value)}
+              stroke="var(--color-muted)"
+              strokeOpacity={0.6}
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+          {hover !== null && (
+            <line x1={x(hover)} x2={x(hover)} y1={0} y2={height} stroke="var(--color-line)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
+          )}
+          {values.length > 1 && (
+            <path d={path} fill="none" stroke="var(--color-chart)" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+          )}
+          {data.map((d, i) =>
+            d.value === null ? null : (
+              <circle
+                key={d.key}
+                cx={x(i)}
+                cy={y(d.value)}
+                r={hover === i ? 5 : 3}
+                fill="var(--color-chart)"
+                stroke="var(--color-surface)"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+              />
+            ),
+          )}
+          {/* áreas de hover maiores que o ponto */}
+          {data.map((d, i) => (
+            <rect
+              key={`hit-${d.key}`}
+              x={x(i) - width / data.length / 2}
+              y={0}
+              width={width / data.length}
+              height={height}
+              fill="transparent"
+              onMouseEnter={() => setHover(i)}
+              onMouseLeave={() => setHover(null)}
+            />
+          ))}
+        </svg>
+        {reference && (
+          <span className="absolute right-0 text-[10px] text-muted" style={{ top: `calc(${(y(reference.value) / height) * 100}% - 14px)` }}>
+            {reference.label}
+          </span>
+        )}
+        {h && (
+          <div
+            className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-xs text-white shadow"
+            style={{ left: `${(x(hover!) / width) * 100}%` }}
+          >
+            {h.label}: {h.value === null ? 'sem registro' : format(h.value)}
+          </div>
+        )}
+      </div>
+      <div className="mt-1 flex justify-between text-[11px] text-muted" aria-hidden="true">
+        {data.map((d, i) => (i % showEvery === 0 || i === data.length - 1 ? <span key={d.key}>{d.label}</span> : null))}
+      </div>
+      <SrTable
+        caption={caption}
+        data={data.filter((d) => d.value !== null).map((d) => ({ key: d.key, label: d.label, value: d.value! }))}
+        format={format}
+      />
     </figure>
   )
 }

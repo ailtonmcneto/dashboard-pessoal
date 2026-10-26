@@ -50,7 +50,7 @@ Para subir a API também em container: `docker compose --profile api up -d --bui
 backend/                     API Spring Boot
   src/main/java/com/vida/    um pacote por módulo (auth, academico, financas, saude, metas, hoje…)
   src/main/resources/
-    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico, V4 finanças…)
+    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico, V4 finanças, V5 saúde…)
 frontend/                    SPA React + Vite + TS
 docker-compose.yml           Postgres 18 (+ API no profile "api")
 ```
@@ -85,13 +85,19 @@ Erros da API seguem o formato `application/problem+json`; erros de validação t
 - **Recorrências** geram os lançamentos sozinhas (ao criar, e depois de hora em hora). Em conta, nascem *pendentes* para você confirmar. Mensal no dia 31 cai no último dia dos meses curtos, e volta para 31 quando o mês tem.
 - **Orçamento** é por categoria e mês, conta as subcategorias e avisa a partir de 80%.
 
+## Saúde e hábitos: regras
+
+- **Métricas** são suas (sono, água, peso…): cada uma tem unidade, uma regra para o valor do dia — *soma* (água, treino), *média* (humor) ou *último registro* (peso) — e, se quiser, uma meta diária *mínima* ("pelo menos 2 L") ou *máxima* ("no máximo 2 h de tela"). O dia é contado no seu fuso.
+- **Gráficos:** métricas de soma aparecem em colunas por dia; média e último, em linha ligando os dias com registro (o que importa é a tendência). A meta aparece como linha de referência.
+- **Hábitos:** *todo dia*, *dias fixos* da semana ou *X vezes por semana* (qualquer dia). A sequência é calculada: hoje ainda não feito não quebra a sequência; dias fora da frequência são pulados; no "X por semana" a sequência conta semanas que bateram a meta. Também há recorde, progresso da semana e taxa dos últimos 30 dias.
+
 ## Roadmap
 
 0. ~~Esqueleto do projeto~~
 1. ~~Núcleo e autenticação (sessão + CSRF), agenda~~
 2. ~~Acadêmico — semestres, disciplinas, horário, avaliações, faltas, assuntos, cursos, sessões de estudo~~
 3. ~~Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento~~
-4. Saúde e hábitos — métricas, medições, hábitos com sequência
+4. ~~Saúde e hábitos — métricas, medições, hábitos com sequência~~
 5. Metas e planos — metas, marcos, projetos, tarefas
 6. Hoje — visão agregada do dia
 

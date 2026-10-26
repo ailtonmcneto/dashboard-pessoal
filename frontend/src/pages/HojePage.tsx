@@ -1,15 +1,20 @@
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Flame } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { EventList } from '../agenda/EventList'
 import { useUpcomingEvents } from '../agenda/events'
 import { useMe } from '../auth/auth'
+import { StatusBadge } from '../components/StatusBadge'
 import { Card, Empty, ErrorText, Loaded, PageHeader, SectionTitle } from '../components/ui'
 import { useSchedule, useTopics, useUpcomingAssessments } from '../estudos/api'
 import { ASSESSMENT_KIND } from '../estudos/labels'
 import { ColorDot } from '../estudos/parts'
 import { useMonthSummary } from '../financas/api'
 import { currentMonth, formatClock, formatDate, formatMoney, todayIso } from '../lib/format'
+import { useHabits, useMetrics } from '../saude/api'
+import { DayToggle } from '../saude/HabitToggle'
+import { formatValue, statusFor } from '../saude/labels'
+import { QuickAdd } from '../saude/MetricasPage'
 
 const todayFmt = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
@@ -84,6 +89,78 @@ function UpcomingAssessments() {
             </ul>
           )
         }
+      </Loaded>
+    </Card>
+  )
+}
+
+function HabitsToday() {
+  const habits = useHabits()
+  const today = todayIso()
+  return (
+    <Card>
+      <SectionTitle action={<MoreLink to="/saude">Hábitos</MoreLink>}>Hábitos de hoje</SectionTitle>
+      <Loaded query={habits}>
+        {(list) => {
+          const due = list.filter((h) => !h.archived && h.dueToday)
+          if (due.length === 0) return <Empty>Nenhum hábito para hoje.</Empty>
+          const done = due.filter((h) => h.doneToday).length
+          return (
+            <>
+              <p className="mb-3 text-xs text-muted">
+                {done} de {due.length} feitos
+              </p>
+              <ul className="space-y-2">
+                {due.map((h) => (
+                  <li key={h.id} className="flex items-center gap-3">
+                    <DayToggle habit={h} date={today} due done={h.doneToday} size="lg" />
+                    <span className={`flex-1 text-sm ${h.doneToday ? 'text-muted line-through' : 'font-medium'}`}>{h.name}</span>
+                    {h.currentStreak > 0 && (
+                      <span className="inline-flex items-center gap-1 text-xs tabular-nums text-muted">
+                        <Flame size={13} className="text-warning" aria-hidden="true" />
+                        {h.currentStreak}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        }}
+      </Loaded>
+    </Card>
+  )
+}
+
+function HealthToday() {
+  const metrics = useMetrics()
+  return (
+    <Card>
+      <SectionTitle action={<MoreLink to="/saude/metricas">Métricas</MoreLink>}>Saúde hoje</SectionTitle>
+      <Loaded query={metrics}>
+        {(list) => {
+          const withTarget = list.filter((m) => !m.archived && m.target != null)
+          if (withTarget.length === 0) return <Empty>Nenhuma métrica com meta.</Empty>
+          return (
+            <ul className="space-y-3">
+              {withTarget.map((m) => {
+                const status = statusFor(m)
+                return (
+                  <li key={m.id} className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="font-medium">{m.name}</span>
+                      <StatusBadge tone={status.tone} label={status.label} />
+                      <span className="ml-auto tabular-nums text-muted">
+                        {formatValue(m.today ?? 0, m.unit)} / {formatValue(m.target!, m.unit)}
+                      </span>
+                    </div>
+                    <QuickAdd metric={m} />
+                  </li>
+                )
+              })}
+            </ul>
+          )
+        }}
       </Loaded>
     </Card>
   )
@@ -165,6 +242,8 @@ export function HojePage() {
           )}
         </Card>
         <ReviewsToday />
+        <HabitsToday />
+        <HealthToday />
         <MoneyToday />
       </div>
     </>

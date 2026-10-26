@@ -78,3 +78,10 @@ export const formatMonth = (month: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 export const formatMonthShort = (month: string) => monthShortFmt.format(parseLocalDate(`${month}-01`)).replace('.', '')
+
+/** Soma dias a uma data 'AAAA-MM-DD' (sem passar por UTC). */
+export function addDaysIso(date: string, n: number): string {
+  const d = parseLocalDate(date)
+  d.setDate(d.getDate() + n)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}

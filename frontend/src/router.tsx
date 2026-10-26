@@ -18,6 +18,10 @@ import { AgendaPage } from './pages/AgendaPage'
 import { ComingSoonPage } from './pages/ComingSoonPage'
 import { HojePage } from './pages/HojePage'
 import { LoginPage } from './pages/LoginPage'
+import { HabitosPage } from './saude/HabitosPage'
+import { MetricaPage } from './saude/MetricaPage'
+import { MetricasPage } from './saude/MetricasPage'
+import { SaudeLayout } from './saude/SaudeLayout'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -52,9 +56,12 @@ export const router = createBrowserRouter([
       },
       {
         path: 'saude',
-        element: (
-          <ComingSoonPage title="Saúde e hábitos" phase={4} items={['Métricas (sono, peso, água…)', 'Hábitos com sequência']} />
-        ),
+        element: <SaudeLayout />,
+        children: [
+          { index: true, element: <HabitosPage /> },
+          { path: 'metricas', element: <MetricasPage /> },
+          { path: 'metricas/:id', element: <MetricaPage /> },
+        ],
       },
       {
         path: 'metas',

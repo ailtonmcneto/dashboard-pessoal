@@ -84,6 +84,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/metrics/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateMetric"];
+        post?: never;
+        delete: operations["deleteMetric"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/habits/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["updateHabit"];
+        post?: never;
+        delete: operations["deleteHabit"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/habits/{id}/checks/{date}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["check"];
+        post?: never;
+        delete: operations["uncheck"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events/{id}": {
         parameters: {
             query?: never;
@@ -334,6 +382,70 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["pauseRecurrence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["metrics"];
+        put?: never;
+        post: operations["createMetric"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics/{id}/measurements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["measurements"];
+        put?: never;
+        post: operations["addMeasurement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/metrics/defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createDefaultMetrics"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/habits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["habits"];
+        put?: never;
+        post: operations["createHabit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -596,6 +708,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/metrics/{id}/series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["series"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/habits/{id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/finance/summary": {
         parameters: {
             query?: never;
@@ -619,7 +763,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["history"];
+        get: operations["history_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -735,6 +879,22 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["deleteSlot"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/measurements/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteMeasurement"];
         options?: never;
         head?: never;
         patch?: never;
@@ -951,6 +1111,84 @@ export interface components {
             active: boolean;
             /** Format: int32 */
             generated: number;
+        };
+        MetricRequest: {
+            name: string;
+            unit: string;
+            /** @enum {string|null} */
+            aggregation?: "SOMA" | "MEDIA" | "ULTIMO" | null;
+            target?: number | null;
+            /** @enum {string|null} */
+            targetKind?: "MINIMO" | "MAXIMO" | null;
+            color?: string | null;
+            archived?: boolean | null;
+        };
+        MetricResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            unit: string;
+            /** @enum {string} */
+            aggregation: "SOMA" | "MEDIA" | "ULTIMO";
+            target?: number | null;
+            /** @enum {string|null} */
+            targetKind?: "MINIMO" | "MAXIMO" | null;
+            color: string;
+            archived: boolean;
+            today?: number | null;
+            /** @enum {string} */
+            todayStatus: "SEM_DADOS" | "SEM_META" | "ATINGIDA" | "NAO_ATINGIDA";
+            average7?: number | null;
+            lastValue?: number | null;
+            /** Format: date-time */
+            lastAt?: string | null;
+        };
+        HabitRequest: {
+            name: string;
+            /** @enum {string|null} */
+            schedule?: "DIARIO" | "DIAS_SEMANA" | "X_POR_SEMANA" | null;
+            weekdays?: number[] | null;
+            /** Format: int32 */
+            timesPerWeek?: number | null;
+            /** Format: date */
+            startsOn?: string | null;
+            color?: string | null;
+            archived?: boolean | null;
+        };
+        DayCell: {
+            /** Format: date */
+            date: string;
+            due: boolean;
+            done: boolean;
+        };
+        HabitResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            schedule: "DIARIO" | "DIAS_SEMANA" | "X_POR_SEMANA";
+            weekdays: number[];
+            /** Format: int32 */
+            timesPerWeek?: number | null;
+            /** Format: date */
+            startsOn: string;
+            color: string;
+            archived: boolean;
+            /** Format: int32 */
+            currentStreak: number;
+            /** Format: int32 */
+            bestStreak: number;
+            /** @enum {string} */
+            streakUnit: "DIAS" | "SEMANAS";
+            dueToday: boolean;
+            doneToday: boolean;
+            /** Format: int32 */
+            doneThisWeek: number;
+            /** Format: int32 */
+            targetThisWeek: number;
+            /** Format: int32 */
+            rate30: number;
+            lastDays: components["schemas"]["DayCell"][];
         };
         EventRequest: {
             title: string;
@@ -1183,6 +1421,22 @@ export interface components {
             notes?: string | null;
             label: string;
         };
+        MeasurementRequest: {
+            value: number;
+            /** Format: date-time */
+            measuredAt?: string | null;
+            note?: string | null;
+        };
+        MeasurementResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            metricTypeId: string;
+            /** Format: date-time */
+            measuredAt: string;
+            value: number;
+            note?: string | null;
+        };
         SlotRequest: {
             /** Format: int32 */
             weekday: number;
@@ -1277,6 +1531,12 @@ export interface components {
             totalMinutes: number;
             bySubject: components["schemas"]["StudyBucket"][];
             byDay: components["schemas"]["StudyDay"][];
+        };
+        DayValue: {
+            /** Format: date */
+            date: string;
+            value?: number | null;
+            met?: boolean | null;
         };
         CategoryTotal: {
             /** Format: uuid */
@@ -1543,6 +1803,144 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    updateMetric: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetricRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MetricResponse"];
+                };
+            };
+        };
+    };
+    deleteMetric: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateHabit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HabitRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HabitResponse"];
+                };
+            };
+        };
+    };
+    deleteHabit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HabitResponse"];
+                };
+            };
+        };
+    };
+    uncheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HabitResponse"];
+                };
             };
         };
     };
@@ -2238,6 +2636,165 @@ export interface operations {
             };
         };
     };
+    metrics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MetricResponse"][];
+                };
+            };
+        };
+    };
+    createMetric: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetricRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MetricResponse"];
+                };
+            };
+        };
+    };
+    measurements: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MeasurementResponse"][];
+                };
+            };
+        };
+    };
+    addMeasurement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeasurementRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MeasurementResponse"];
+                };
+            };
+        };
+    };
+    createDefaultMetrics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MetricResponse"][];
+                };
+            };
+        };
+    };
+    habits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HabitResponse"][];
+                };
+            };
+        };
+    };
+    createHabit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HabitRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HabitResponse"];
+                };
+            };
+        };
+    };
     list_1: {
         parameters: {
             query?: {
@@ -2770,6 +3327,56 @@ export interface operations {
             };
         };
     };
+    series: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DayValue"][];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string[];
+                };
+            };
+        };
+    };
     summary_1: {
         parameters: {
             query?: {
@@ -2792,7 +3399,7 @@ export interface operations {
             };
         };
     };
-    history: {
+    history_1: {
         parameters: {
             query?: {
                 until?: string;
@@ -2944,6 +3551,26 @@ export interface operations {
             header?: never;
             path: {
                 slotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteMeasurement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
             };
             cookie?: never;
         };

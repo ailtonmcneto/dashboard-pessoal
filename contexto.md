@@ -1,6 +1,6 @@
 # Contexto do projeto — Vida (dashboard pessoal)
 
-Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 3**.
+Documento de passagem de contexto: o que foi decidido, o que já existe, como o código está organizado e o que falta. Atualizado ao fim da **fase 4**.
 
 ---
 
@@ -57,9 +57,11 @@ backend/
     financas/    Account, CreditCard, Category, Transaction, Recurrence, Budget, Schedules
                  (fatura/parcelas/ocorrências), FinanceQueries (SQL de agregação), RecurrenceJob,
                  services e FinanceController
+    saude/       MetricType, Measurement, Habit, HabitCheck, DailyValues (valor do dia),
+                 HabitStats (sequência/semana/taxa), MetricService, HabitService, HealthController
   src/main/resources/
     application.yml
-    db/migration/  V1__core.sql, V2__spring_session.sql, V3__academico.sql, V4__financas.sql
+    db/migration/  V1__core.sql, V2__spring_session.sql, V3__academico.sql, V4__financas.sql, V5__saude.sql
   src/test/      IntegrationTest (base), TestcontainersConfig, testes por módulo
                  resources/application.properties (vida.jobs.enabled=false)
 frontend/
@@ -69,6 +71,7 @@ frontend/
   src/agenda/    lista de eventos
   src/estudos/   páginas e hooks do acadêmico
   src/financas/  páginas e hooks de finanças
+  src/saude/     hábitos (com calendário) e métricas (com gráfico)
   src/pages/     Hoje, Agenda, Login, "em breve"
   src/router.tsx
 docker-compose.yml   Postgres 18 (+ API no profile "api")
@@ -113,7 +116,7 @@ contexto.md          este arquivo
   - dado de série única: `--color-chart: #0d9488`;
   - receitas × despesas: `--color-income: #2a78d6` e `--color-expense: #eb6834`;
   - status (sempre com ícone + rótulo): `good`, `warning` e `critical`.
-- **Gráficos** (`components/charts.tsx`): `ColumnChart`, `BarList`, `GroupedColumns` (com legenda) e `Meter`. Todos têm tooltip e uma tabela `sr-only` para leitor de tela.
+- **Gráficos** (`components/charts.tsx`): `ColumnChart` (com linha de referência opcional), `BarList`, `GroupedColumns` (com legenda), `LineChart` (liga os dias com registro, ponto em cada registro, tooltip com cruzamento) e `Meter`. Todos têm tooltip e uma tabela `sr-only` para leitor de tela.
 - **Tema escuro:** só o tema claro por enquanto.
 
 ---
@@ -186,7 +189,23 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
   - "Primeiros passos" para quem está começando.
   - Cartão "Dinheiro" na tela Hoje.
 
-### Testes (41 no backend, todos passando)
+### Fase 4 — Saúde e hábitos (V5)
+- **Tabelas:** `metric_types`, `measurements`, `habits`, `habit_checks`.
+- **Regras:**
+  - **Valor do dia** (no fuso do usuário): soma, média ou último registro.
+  - **Meta:** mínima ou máxima. Status do dia: SEM_DADOS, SEM_META, ATINGIDA ou NAO_ATINGIDA. Também a média dos últimos 7 dias.
+  - **Hábitos:** DIARIO, DIAS_SEMANA (`weekdays_mask`, bit dia ISO − 1) ou X_POR_SEMANA.
+  - **Sequência:** hoje em aberto não quebra; dias não devidos são pulados; no semanal conta semanas. Também recorde, progresso da semana, taxa de 30 dias e os últimos 7 dias.
+  - **Marcar o dia:** idempotente. Não aceita dia futuro nem dia antes do início.
+- **Endpoints:**
+  - **Métricas:** `/metrics` (+ `/defaults`: sono, água, treino, peso, humor), `/metrics/{id}/series?from&to`, `/metrics/{id}/measurements` (GET/POST), `/measurements/{id}`.
+  - **Hábitos:** `/habits`, `PUT|DELETE /habits/{id}/checks/{data}`, `/habits/{id}/history?from&to`.
+- **Telas:**
+  - Saúde com abas Hábitos (últimos 7 dias clicáveis, sequência, calendário de 12 semanas) e Métricas (cards com valor de hoje, meta, registro rápido).
+  - Detalhe da métrica com gráfico de 7, 30 ou 90 dias: colunas para soma, linha para média ou último.
+  - Tela Hoje com "Hábitos de hoje" (marcar ali mesmo) e "Saúde hoje" (métricas com meta e registro rápido).
+
+### Testes (54 no backend, todos passando)
 
 | Classe | Testes | O que cobre |
 |---|---|---|
@@ -198,11 +217,14 @@ Spring Session JDBC com a migração V2. Reiniciar a API não desloga.
 | `SchedulesTest` | 4 | fatura, vencimento, parcelas, dia 31 |
 | `FinanceApiTest` | 7 | API de finanças |
 | `RecurrenceJobTest` | 1 | job das recorrências |
+| `HabitStatsTest` | 5 | sequências: diário, dias fixos, X por semana, início |
+| `DailyValuesTest` | 3 | valor do dia no fuso; metas mínima e máxima |
+| `HealthApiTest` | 5 | API de saúde e hábitos |
 | `VidaApplicationTests` | 1 | contexto sobe com Postgres 18 |
 
 Todo módulo tem teste de **isolamento entre usuários** (o outro usuário recebe 404) e pelo menos um teste mostrando que a **FK composta barra o vínculo cruzado direto no banco**.
 
-O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das três fases foram testados no Chromium com Playwright, incluindo o layout no celular.
+O front passa em `npm run lint` e `npm run build` sem avisos. Os fluxos das quatro fases foram testados no Chromium com Playwright, incluindo o layout no celular.
 
 ---
 
@@ -237,6 +259,8 @@ O autor já tem JDK 25, Node 22+ e Docker instalados na máquina.
   - Editar uma recorrência pela tela.
   - Estorno no cartão.
   - Importar extrato.
+- **Saúde:**
+  - Editar nome, frequência ou meta de um hábito ou métrica já criados (só arquivar e apagar pela tela).
 - **Geral:**
   - Tema escuro.
   - Remédios, lembretes e PWA (depois da v1).
@@ -244,14 +268,6 @@ O autor já tem JDK 25, Node 22+ e Docker instalados na máquina.
 ---
 
 ## 9. Próximas fases (plano aprovado)
-
-### Fase 4 — Saúde e hábitos (migração V5)
-- `metric_types`: nome (sono, peso, água, treino, humor…), unidade, agregação (soma/média/último) e meta diária.
-- `measurements`: tipo, `measured_at`, valor e nota. Gráficos por métrica, sem colunas fixas.
-- `habits`: frequência (diário, X por semana ou dias da semana), `weekdays_mask` e início; podem ser arquivados.
-- `habit_checks`: `unique(habit_id, date)`, com a sequência sempre calculada.
-- Consultas médicas usam a Agenda (`events` com `kind = CONSULTA`).
-- Remédios **não** entram.
 
 ### Fase 5 — Metas e planos (migração V6)
 - `goals`:
