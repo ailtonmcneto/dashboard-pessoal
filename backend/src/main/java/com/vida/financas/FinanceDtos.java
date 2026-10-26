@@ -151,6 +151,10 @@ public final class FinanceDtos {
             BigDecimal totalBalance, int pendingCount, BigDecimal pendingAmount) {
     }
 
+    /** Despesas em conta ainda não pagas com data já passada. */
+    public record OverdueBills(int count, BigDecimal amount) {
+    }
+
     public record MonthTotals(YearMonth month, BigDecimal income, BigDecimal expense) {
     }
 }

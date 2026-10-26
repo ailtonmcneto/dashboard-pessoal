@@ -26,7 +26,7 @@ public final class EventDtos {
             UUID id, String title, Kind kind, Instant startsAt, @Nullable Instant endsAt,
             @Nullable String location, @Nullable String notes) {
 
-        static EventResponse of(Event e) {
+        public static EventResponse of(Event e) {
             return new EventResponse(e.getId(), e.getTitle(), e.getKind(), e.getStartsAt(), e.getEndsAt(),
                     e.getLocation(), e.getNotes());
         }

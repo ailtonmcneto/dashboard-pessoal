@@ -5,6 +5,7 @@ import com.vida.common.CurrentUser;
 import com.vida.financas.FinanceDtos.CategoryTotal;
 import com.vida.financas.FinanceDtos.MonthSummary;
 import com.vida.financas.FinanceDtos.MonthTotals;
+import com.vida.financas.FinanceDtos.OverdueBills;
 import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -46,6 +47,13 @@ public class ReportService {
         FinanceQueries.Pending pending = queries.pendingExpenses(userId, month.atEndOfMonth());
         return new MonthSummary(month, income, expense, income.subtract(expense), expenses, incomes, totalBalance,
                 pending.count(), pending.amount());
+    }
+
+    /** Contas vencidas: despesas em conta não pagas com data anterior a hoje. */
+    @Transactional(readOnly = true)
+    public OverdueBills overdueBills() {
+        FinanceQueries.Pending p = queries.pendingExpenses(currentUser.id(), currentUser.today().minusDays(1));
+        return new OverdueBills(p.count(), p.amount());
     }
 
     /** Receitas e despesas dos últimos {@code months} meses até {@code until} (meses vazios com zero). */
