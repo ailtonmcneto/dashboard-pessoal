@@ -1,0 +1,24 @@
+package com.vida.financas;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.repository.Repository;
+
+interface CreditCardRepository extends Repository<CreditCard, UUID> {
+
+    Optional<CreditCard> findByIdAndUserId(UUID id, UUID userId);
+
+    List<CreditCard> findByUserIdOrderByArchivedAscNameAsc(UUID userId);
+
+    List<CreditCard> findByUserIdAndIdIn(UUID userId, Collection<UUID> ids);
+
+    boolean existsByUserIdAndNameIgnoreCase(UUID userId, String name);
+
+    boolean existsByUserIdAndNameIgnoreCaseAndIdNot(UUID userId, String name, UUID id);
+
+    CreditCard save(CreditCard card);
+
+    void delete(CreditCard card);
+}

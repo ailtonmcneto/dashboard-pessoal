@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: vida-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/vida}
+    username: ${DB_USER:vida}
+    password: ${DB_PASSWORD:vida}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+  session:
+    jdbc:
+      # as tabelas vêm da migração V2 (Flyway), não do Spring Session
+      initialize-schema: never
+
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  servlet:
+    context-path: /api
+    session:
+      timeout: 14d
+      cookie:
+        http-only: true
+        same-site: lax
+        max-age: 14d
+
+vida:
+  auth:
+    # false = só o primeiro cadastro é aceito (uso pessoal)
+    signup-open: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /docs

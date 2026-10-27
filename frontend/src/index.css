@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1c1917;
+  --color-muted: #78716c;
+  --color-line: #e7e5e4;
+  --color-surface: #ffffff;
+  --color-canvas: #f5f5f4;
+  --color-accent: #0f766e;
+  --color-accent-soft: #ccfbf1;
+  --color-danger: #b91c1c;
+
+  /* dados (validado com o dataviz: banda de luminosidade, croma e contraste ≥ 3:1) */
+  --color-chart: #0d9488;
+  /* duas séries (receitas × despesas), par validado: ΔE 24,7 em protanopia */
+  --color-income: #2a78d6;
+  --color-expense: #eb6834;
+  /* status: sempre com ícone + rótulo, nunca só a cor */
+  --color-good: #0ca30c;
+  --color-warning: #fab219;
+  --color-critical: #d03b3b;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}

@@ -1,58 +1,120 @@
-# Vida — dashboard de controle pessoal
+# Vida — dashboard pessoal
 
-Painel pessoal com cinco áreas: **Hoje** (resumo do dia), **Finanças**, **Hábitos e saúde**, **Tarefas e metas** e **Agenda e estudos**.
+Painel para organizar a vida: **estudos** (faculdade, cursos, projetos), **finanças**, **saúde e hábitos** e **metas e planos**, com uma tela **Hoje** que junta tudo.
 
-Stack: Next.js 16 (App Router, Server Actions) · Supabase (Postgres + Auth + RLS) · Tailwind CSS 4 · Recharts.
+| Camada | Stack |
+|---|---|
+| API | Java 25 · Spring Boot 4 (Web MVC, Data JPA, Validation, Security) · Flyway · springdoc-openapi |
+| Banco | PostgreSQL 18 (ids `uuidv7()`) |
+| Sessão | Spring Session JDBC (no próprio Postgres) |
+| Web | React · Vite · TypeScript · TanStack Query · React Router · Tailwind CSS |
+| Testes | JUnit 5 · Testcontainers (Postgres real) |
 
-## Rodando pela primeira vez
+## Pré-requisitos
 
-1. **Crie um projeto no Supabase** em [supabase.com](https://supabase.com) (o plano grátis basta).
-2. **Crie as tabelas**: no painel do Supabase, abra *SQL Editor*, cole o conteúdo de `supabase/schema.sql` e rode. O script pode ser rodado de novo sem quebrar nada.
-3. **Configure as variáveis**:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Preencha com a *Project URL* e a *Publishable key* (em *Project Settings → API Keys*).
-4. **Instale e rode**:
-   ```bash
-   npm install
-   npm run dev
-   ```
-   Abra http://localhost:3000, clique em **Criar conta** e entre.
+- JDK 25
+- Node 22+
+- Docker (para o Postgres e para os testes com Testcontainers)
 
-> Por padrão o Supabase exige confirmação de e-mail. Para uso pessoal, você pode desligar em *Authentication → Sign In / Providers → Email → Confirm email*. Depois de criar sua conta, desligue também *Allow new users to sign up* para ninguém mais se cadastrar.
+## Rodando
+
+```bash
+# 1. banco
+docker compose up -d db
+
+# 2. API — http://localhost:8080/api (Swagger em /api/docs)
+cd backend
+./mvnw spring-boot:run
+
+# 3. front — http://localhost:5173 (repassa /api para a porta 8080)
+cd frontend
+npm install
+npm run dev
+```
+
+Para subir a API também em container: `docker compose --profile api up -d --build`.
+
+**Primeiro acesso:** enquanto não existe nenhum usuário, a tela de login vira "Criar conta". Depois do primeiro cadastro ela fica fechada (uso pessoal). Para aceitar novos cadastros, rode a API com `VIDA_AUTH_SIGNUP_OPEN=true`.
+
+## Comandos úteis
+
+| Onde | Comando | O que faz |
+|---|---|---|
+| `backend/` | `./mvnw verify` | compila e roda os testes (sobe um Postgres 18 via Testcontainers) |
+| `frontend/` | `npm run lint` / `npm run build` | lint (oxlint) e checagem de tipos + build |
+| `frontend/` | `npm run api:types` | gera `src/api/schema.d.ts` a partir do OpenAPI da API rodando |
 
 ## Estrutura
 
 ```
-supabase/schema.sql          tabelas, índices e políticas RLS
-src/proxy.ts                 renova a sessão e protege as rotas (o antigo middleware)
-src/lib/supabase/server.ts   cliente Supabase do servidor + requireUser()
-src/lib/format.ts            datas no fuso de Brasília, moeda em R$
-src/app/login/               login, cadastro e saída
-src/app/(app)/page.tsx       Hoje: resumo do dia com o arco do sol
-src/app/(app)/financas/      lançamentos, saldo, gráfico de 6 meses, categorias
-src/app/(app)/habitos/       grade semanal de hábitos, sequências, registro de saúde, gráfico de sono
-src/app/(app)/tarefas/       tarefas por prazo e metas com progresso
-src/app/(app)/agenda/        compromissos dos próximos 30 dias e itens de estudo
-src/components/              navegação, gráficos e peças reaproveitadas
+backend/                     API Spring Boot
+  src/main/java/com/vida/    um pacote por módulo (auth, academico, financas, saude, metas, hoje…)
+  src/main/resources/
+    db/migration/            migrações Flyway (V1 núcleo, V2 sessões, V3 acadêmico, V4 finanças, V5 saúde, V6 metas)
+frontend/                    SPA React + Vite + TS
+docker-compose.yml           Postgres 18 (+ API no profile "api")
 ```
 
-Cada página é um Server Component que lê direto do Supabase; cada formulário chama uma Server Action no `actions.ts` da mesma pasta, que grava e chama `revalidatePath`. Não há API REST própria nem estado no cliente além dos gráficos.
+## Autenticação
 
-## Segurança
+Sessão no servidor com cookie `httpOnly` (sem JWT), guardada no Postgres pelo Spring Session JDBC (tabelas `spring_session*`, migração V2): reiniciar a API não desloga, e a sessão dura 14 dias. Como front e API ficam no mesmo domínio (proxy do Vite em dev), o navegador manda o cookie sozinho. Requisições que alteram dados levam o token CSRF: a API grava o cookie `XSRF-TOKEN` e o front devolve o valor no header `X-XSRF-TOKEN` (`frontend/src/api/client.ts`).
 
-Todas as tabelas têm Row Level Security com a política "dono lê e escreve": cada linha tem `user_id` preenchido automaticamente por `auth.uid()`, e o banco só devolve ou aceita linhas do usuário logado, mesmo que alguém chame a API diretamente.
+Erros da API seguem o formato `application/problem+json`; erros de validação trazem `errors: {campo: mensagem}`.
 
-## Deploy
+## Convenções do banco
 
-Funciona na Vercel sem ajustes: importe o repositório e cadastre as duas variáveis do `.env.example`. Depois, em *Authentication → URL Configuration* no Supabase, adicione a URL de produção.
+- Chave primária `uuid` gerada com `uuidv7()` (ordenada no tempo, não adivinhável).
+- `user_id` em todas as tabelas e chaves estrangeiras compostas `(x_id, user_id)`: o banco não aceita ligar dados de usuários diferentes.
+- Dinheiro em `numeric(14,2)`, dias em `date`, instantes em `timestamptz`.
+- Saldos, médias e progresso são calculados, nunca armazenados.
+- Nos records de request/response, campo sem `@Nullable` é obrigatório no OpenAPI; com `@Nullable`, opcional e pode ser `null`. É isso que define os tipos gerados no front.
 
-## Ideias para evoluir
+## Estudos: regras de cálculo
 
-- Orçamento mensal por categoria com alerta quando passar do limite
-- Importar extrato do banco (CSV/OFX) para Finanças
-- Sincronizar a Agenda com o Google Calendar
-- Lançamentos recorrentes (aluguel, assinaturas)
-- Heatmap anual de hábitos
-- PWA para instalar no celular
+- **Média:** ponderada, com cada nota normalizada para 0–10 (`nota / nota máxima × 10`). A disciplina mostra quanto falta tirar, em média, nas avaliações ainda sem nota para chegar na média de aprovação do semestre, e a situação: *sem notas*, *em dia*, *em risco* (precisa de mais que a média), *aprovado* ou *reprovado* por nota.
+- **Faltas:** alerta a partir de 75% do limite cadastrado na disciplina.
+- **Revisão espaçada:** ao revisar um assunto você informa o domínio de 0 a 5, que define a próxima revisão: 1, 2, 4, 7, 15 ou 30 dias.
+- **Sessões de estudo:** apagar uma disciplina ou curso mantém as horas estudadas, que passam a contar como "Sem vínculo".
+
+## Finanças: regras
+
+- **Saldo** nunca é guardado: é o saldo inicial mais a soma dos lançamentos. *Saldo* conta só o que já foi pago/recebido; *previsto* inclui os pendentes.
+- **Transferência** move dinheiro entre contas e não entra como receita nem despesa.
+- **Cartão:** a compra é despesa na data em que foi feita e entra na fatura pelo dia de fechamento (do dia do fechamento em diante, vai para a fatura seguinte). **Pagar a fatura** tira o dinheiro da conta, mas não conta de novo como despesa.
+- **Parcelado:** vira um lançamento por mês; os centavos que sobram ficam na 1ª parcela.
+- **Recorrências** geram os lançamentos sozinhas (ao criar, e depois de hora em hora). Em conta, nascem *pendentes* para você confirmar. Mensal no dia 31 cai no último dia dos meses curtos, e volta para 31 quando o mês tem.
+- **Orçamento** é por categoria e mês, conta as subcategorias e avisa a partir de 80%.
+
+## Saúde e hábitos: regras
+
+- **Métricas** são suas (sono, água, peso…): cada uma tem unidade, uma regra para o valor do dia — *soma* (água, treino), *média* (humor) ou *último registro* (peso) — e, se quiser, uma meta diária *mínima* ("pelo menos 2 L") ou *máxima* ("no máximo 2 h de tela"). O dia é contado no seu fuso.
+- **Gráficos:** métricas de soma aparecem em colunas por dia; média e último, em linha ligando os dias com registro (o que importa é a tendência). A meta aparece como linha de referência.
+- **Hábitos:** *todo dia*, *dias fixos* da semana ou *X vezes por semana* (qualquer dia). A sequência é calculada: hoje ainda não feito não quebra a sequência; dias fora da frequência são pulados; no "X por semana" a sequência conta semanas que bateram a meta. Também há recorde, progresso da semana e taxa dos últimos 30 dias.
+
+## Metas e planos: regras
+
+- **Progresso da meta**, sempre calculado, de um de quatro jeitos: *por marcos* (concluídos ÷ total), *por tarefas* (tarefas ligadas feitas ÷ total), *valor manual* (ex.: 6 de 12 livros) ou *saldo de uma conta* até o valor-alvo (ex.: juntar R$ 10 mil para a viagem).
+- **Ritmo:** com início e prazo, o esperado é a fração do tempo que já passou. A meta fica *adiantada*, *no ritmo* (até 10 pontos de diferença) ou *atrasada*; passado o prazo sem chegar a 100%, *atrasada*. Na barra, um traço marca onde você deveria estar hoje.
+- **Tarefas** formam uma lista só, com visões *Hoje* (vencidas e de hoje), *Próximos 7 dias*, *Todas abertas* e *Feitas*. Cada tarefa pode ser de uma meta, de um marco (aí conta para a meta dele), de um projeto e/ou de uma disciplina. Apagar meta, projeto ou disciplina não apaga as tarefas.
+- **Projetos** mostram o progresso pelas tarefas e avisam quando passam do prazo.
+
+## Hoje
+
+A tela inicial vem de uma chamada só (`GET /api/hoje`) e começa pelos **alertas do dia**, críticos primeiro, cada um com link para onde resolver: conta vencida, fatura vencendo ou atrasada, prova hoje ou amanhã, faltas perto ou acima do limite, nota em risco, tarefa atrasada, orçamento perto ou estourado e meta atrasada. Depois vêm um resumo (tarefas, hábitos, aulas, estudo na semana, saldo) e os cartões, onde dá para concluir tarefas, marcar hábitos e registrar métricas sem sair da tela. Qualquer gravação no app recarrega a tela Hoje em segundo plano.
+
+## Edição
+
+Tudo o que se cria pela tela também se edita: o lápis ao lado de cada item abre uma janela com o mesmo formulário da criação, já preenchido. Alguns campos ficam de fora de propósito: o tipo de um lançamento ou de uma categoria não muda (apague e crie outro), cada parcela é editada sozinha, e situação, nota, progresso e valor manual continuam sendo mudados direto na lista, como antes.
+
+## Roadmap
+
+0. ~~Esqueleto do projeto~~
+1. ~~Núcleo e autenticação (sessão + CSRF), agenda~~
+2. ~~Acadêmico — semestres, disciplinas, horário, avaliações, faltas, assuntos, cursos, sessões de estudo~~
+3. ~~Finanças — contas, cartões, categorias, lançamentos, parcelas, recorrência, orçamento~~
+4. ~~Saúde e hábitos — métricas, medições, hábitos com sequência~~
+5. ~~Metas e planos — metas, marcos, projetos, tarefas~~
+6. ~~Hoje — visão agregada do dia~~
+7. ~~Edição — editar pela tela o que antes só dava para criar, arquivar e apagar~~
+
+Depois da v1: controle de remédios, lembretes, importação de extrato, PWA.
